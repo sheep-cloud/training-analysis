@@ -19,7 +19,10 @@
               "reps": "15",
               "time": 1,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "热",
+              "rest_seconds": 120,
+              "left_weight": "70"
             },
             {
               "done": true,
@@ -28,7 +31,10 @@
               "reps": "12",
               "time": 1,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "热",
+              "rest_seconds": 120,
+              "left_weight": "90"
             },
             {
               "done": true,
@@ -37,7 +43,10 @@
               "reps": "10",
               "time": 1,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "热",
+              "rest_seconds": 120,
+              "left_weight": "90"
             },
             {
               "done": true,
@@ -46,7 +55,10 @@
               "reps": "10",
               "time": 120,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 120,
+              "left_weight": "60"
             },
             {
               "done": true,
@@ -55,7 +67,10 @@
               "reps": "10",
               "time": 120,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 120,
+              "left_weight": "62.5"
             },
             {
               "done": true,
@@ -64,7 +79,10 @@
               "reps": "10",
               "time": 120,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 120,
+              "left_weight": "62.5"
             },
             {
               "done": true,
@@ -73,7 +91,10 @@
               "reps": "10",
               "time": 120,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 120,
+              "left_weight": "62.5"
             }
           ]
         },
@@ -87,7 +108,10 @@
               "reps": "12",
               "time": 90,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 90,
+              "left_weight": "50"
             },
             {
               "done": true,
@@ -96,7 +120,10 @@
               "reps": "12",
               "time": 90,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 90,
+              "left_weight": "50"
             },
             {
               "done": true,
@@ -105,7 +132,10 @@
               "reps": "12",
               "time": 90,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 90,
+              "left_weight": "50"
             },
             {
               "done": true,
@@ -114,7 +144,10 @@
               "reps": "12",
               "time": 90,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 90,
+              "left_weight": "50"
             }
           ]
         },
@@ -128,7 +161,10 @@
               "reps": "12",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": null,
+              "left_weight": "45.4"
             },
             {
               "done": true,
@@ -137,7 +173,10 @@
               "reps": "7",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": null,
+              "left_weight": "45.4"
             },
             {
               "done": true,
@@ -146,7 +185,10 @@
               "reps": "10",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": null,
+              "left_weight": "40.6"
             },
             {
               "done": true,
@@ -155,7 +197,10 @@
               "reps": "8",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": null,
+              "left_weight": "40.6"
             }
           ]
         },
@@ -169,7 +214,10 @@
               "reps": "12",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": null
             },
             {
               "done": true,
@@ -178,7 +226,10 @@
               "reps": "12",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": null
             },
             {
               "done": true,
@@ -187,7 +238,10 @@
               "reps": "12",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": null
             },
             {
               "done": true,
@@ -196,7 +250,10 @@
               "reps": "12",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": null
             }
           ]
         },
@@ -210,7 +267,10 @@
               "reps": "12",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "27.2"
             },
             {
               "done": true,
@@ -219,7 +279,10 @@
               "reps": "12",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "27.2"
             },
             {
               "done": true,
@@ -228,7 +291,10 @@
               "reps": "12",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "27.2"
             },
             {
               "done": true,
@@ -237,7 +303,10 @@
               "reps": "12",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "27.2"
             }
           ]
         }
@@ -261,7 +330,10 @@
               "reps": "15",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "25"
             },
             {
               "done": true,
@@ -270,7 +342,10 @@
               "reps": "15",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "25"
             },
             {
               "done": true,
@@ -279,7 +354,10 @@
               "reps": "15",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "25"
             },
             {
               "done": true,
@@ -288,7 +366,10 @@
               "reps": "15",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "25"
             }
           ]
         },
@@ -302,7 +383,10 @@
               "reps": "15",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "25"
             },
             {
               "done": true,
@@ -311,7 +395,10 @@
               "reps": "15",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "25"
             },
             {
               "done": true,
@@ -320,7 +407,10 @@
               "reps": "15",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "25"
             },
             {
               "done": true,
@@ -329,7 +419,10 @@
               "reps": "15",
               "time": 60,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "25"
             }
           ]
         },
@@ -343,7 +436,10 @@
               "reps": "15",
               "time": 45,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "23.8"
             },
             {
               "done": true,
@@ -352,7 +448,10 @@
               "reps": "15",
               "time": 45,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "23.8"
             },
             {
               "done": true,
@@ -361,7 +460,10 @@
               "reps": "15",
               "time": 45,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "26.1"
             },
             {
               "done": true,
@@ -370,7 +472,10 @@
               "reps": "15",
               "time": 45,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "26.1"
             }
           ]
         },
@@ -384,7 +489,10 @@
               "reps": "15",
               "time": 45,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "28.4"
             },
             {
               "done": true,
@@ -393,7 +501,10 @@
               "reps": "15",
               "time": 45,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "28.4"
             },
             {
               "done": true,
@@ -402,7 +513,10 @@
               "reps": "15",
               "time": 45,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "28.4"
             },
             {
               "done": true,
@@ -411,7 +525,10 @@
               "reps": "15",
               "time": 45,
               "rpe": "",
-              "note": ""
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "28.4"
             }
           ]
         }

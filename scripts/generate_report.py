@@ -254,7 +254,10 @@ def merge_training_data(xunji_data, coros_data, date_str):
                         "reps": set_data.get("reps"),
                         "time": set_data.get("time"),
                         "rpe": set_data.get("rpe", ""),
-                        "note": set_data.get("note", "")
+                        "note": set_data.get("note", ""),
+                        "set_type": set_data.get("setType", ""),
+                        "rest_seconds": set_data.get("restSeconds"),
+                        "left_weight": set_data.get("leftWeight"),
                     })
                 train_info["movements"].append(move_info)
 
@@ -606,9 +609,12 @@ def generate_strength_html(merged_data):
                     <tr>
                         <th>动作</th>
                         <th>组</th>
+                        <th>类型</th>
                         <th>重量</th>
                         <th>次数</th>
-                        <th>状态</th>
+                        <th>左侧</th>
+                        <th>休息</th>
+                        <th>完成</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -616,18 +622,51 @@ def generate_strength_html(merged_data):
 
         for movement in train["movements"]:
             for i, set_data in enumerate(movement["sets"], 1):
-                status = "完成" if set_data["done"] else "未完成"
-                badge_cls = "badge-success" if set_data["done"] else "badge-warning"
-                weight_display = f"{set_data['weight']} {set_data['unit']}" if set_data['weight'] else "-"
-                reps_display = f"{set_data['reps']} 次" if set_data['reps'] else "-"
+                # set_type: 组类型(热=热身,空=正式组等)
+                set_type = set_data.get("set_type", "")
+                if set_type == "热":
+                    type_text = "热身"
+                    type_cls = "badge-warning"
+                elif set_type:
+                    type_text = _esc(set_type)
+                    type_cls = "badge-success"
+                else:
+                    type_text = "正式"
+                    type_cls = "badge-success"
+
+                # weight display: 当有左侧重量且与重量不同时注明
+                weight = set_data.get("weight")
+                left_w = set_data.get("left_weight")
+                if weight and left_w and str(left_w) != str(weight):
+                    weight_display = f"{weight} <small style='color:#888;'>(左{left_w})</small>"
+                elif weight:
+                    weight_display = f"{weight}"
+                else:
+                    weight_display = "-"
+                weight_display += f" {set_data.get('unit','kg')}"
+
+                # rest seconds
+                rest = set_data.get("rest_seconds")
+                rest_display = f"{rest} 秒" if rest else "-"
+
+                # reps
+                reps_display = f"{set_data['reps']} 次" if set_data.get("reps") else "-"
+
+                # done status
+                done = set_data.get("done", True)
+                status_text = "完成" if done else "未完成"
+                status_cls = "badge-success" if done else "badge-warning"
 
                 html += f"""
                     <tr>
                         <td>{_esc(movement['name'])}</td>
                         <td>第 {i} 组</td>
+                        <td><span class="badge {type_cls}">{type_text}</span></td>
                         <td>{weight_display}</td>
                         <td>{reps_display}</td>
-                        <td><span class="badge {badge_cls}">{status}</span></td>
+                        <td>{left_w if left_w else '-'}</td>
+                        <td>{rest_display}</td>
+                        <td><span class="badge {status_cls}">{status_text}</span></td>
                     </tr>
                 """
 
