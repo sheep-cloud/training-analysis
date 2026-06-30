@@ -1,0 +1,478 @@
+{
+  "date": "2026-06-29",
+  "strength_training": [
+    {
+      "title": "胸部",
+      "start_time": 1782705704010,
+      "end_time": 1782709321719,
+      "duration_minutes": 60,
+      "calories": 237.0,
+      "training_load": 2,
+      "movements": [
+        {
+          "name": "史密斯机卧推",
+          "sets": [
+            {
+              "done": true,
+              "weight": "20",
+              "unit": "kg",
+              "reps": "15",
+              "time": 1,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "40",
+              "unit": "kg",
+              "reps": "12",
+              "time": 1,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "50",
+              "unit": "kg",
+              "reps": "10",
+              "time": 1,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "60",
+              "unit": "kg",
+              "reps": "10",
+              "time": 120,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "62.5",
+              "unit": "kg",
+              "reps": "10",
+              "time": 120,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "62.5",
+              "unit": "kg",
+              "reps": "10",
+              "time": 120,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "62.5",
+              "unit": "kg",
+              "reps": "10",
+              "time": 120,
+              "rpe": "",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "name": "上斜哑铃卧推",
+          "sets": [
+            {
+              "done": true,
+              "weight": "50",
+              "unit": "kg",
+              "reps": "12",
+              "time": 90,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "50",
+              "unit": "kg",
+              "reps": "12",
+              "time": 90,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "50",
+              "unit": "kg",
+              "reps": "12",
+              "time": 90,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "50",
+              "unit": "kg",
+              "reps": "12",
+              "time": 90,
+              "rpe": "",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "name": "器械胸部推举",
+          "sets": [
+            {
+              "done": true,
+              "weight": "45.4",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "45.4",
+              "unit": "kg",
+              "reps": "7",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "40.6",
+              "unit": "kg",
+              "reps": "10",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "40.6",
+              "unit": "kg",
+              "reps": "8",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "name": "器械推胸",
+          "sets": [
+            {
+              "done": true,
+              "weight": "54.4",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "54.4",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "54.4",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "54.4",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "name": "把手式蝴蝶机飞鸟",
+          "sets": [
+            {
+              "done": true,
+              "weight": "27.2",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "27.2",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "27.2",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "27.2",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "三头",
+      "start_time": 1782729734052,
+      "end_time": 1782731880319,
+      "duration_minutes": 35,
+      "calories": 146.1,
+      "training_load": 2,
+      "movements": [
+        {
+          "name": "仰卧杠铃臂屈伸",
+          "sets": [
+            {
+              "done": true,
+              "weight": "25",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "25",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "25",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "25",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "name": "哑铃过头臂屈伸",
+          "sets": [
+            {
+              "done": true,
+              "weight": "25",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "25",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "25",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "25",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "name": "V-Bar 绳索下压",
+          "sets": [
+            {
+              "done": true,
+              "weight": "23.8",
+              "unit": "kg",
+              "reps": "15",
+              "time": 45,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "23.8",
+              "unit": "kg",
+              "reps": "15",
+              "time": 45,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "26.1",
+              "unit": "kg",
+              "reps": "15",
+              "time": 45,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "26.1",
+              "unit": "kg",
+              "reps": "15",
+              "time": 45,
+              "rpe": "",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "name": "绳索俯身过顶三头肌伸展",
+          "sets": [
+            {
+              "done": true,
+              "weight": "28.4",
+              "unit": "kg",
+              "reps": "15",
+              "time": 45,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "28.4",
+              "unit": "kg",
+              "reps": "15",
+              "time": 45,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "28.4",
+              "unit": "kg",
+              "reps": "15",
+              "time": 45,
+              "rpe": "",
+              "note": ""
+            },
+            {
+              "done": true,
+              "weight": "28.4",
+              "unit": "kg",
+              "reps": "15",
+              "time": 45,
+              "rpe": "",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "cardio_activities": [
+    {
+      "name": "轻松跑",
+      "sport_type": 101,
+      "duration_seconds": 2453,
+      "distance_meters": 7441.1,
+      "avg_hr": 144,
+      "calories": 366.6,
+      "training_load": 80
+    }
+  ],
+  "daily_metrics": {
+    "date": "20260629",
+    "avg_sleep_hrv": 68.0,
+    "baseline": 67.0,
+    "interval_list": [
+      5,
+      47,
+      57,
+      77
+    ],
+    "rhr": 49,
+    "training_load": 84,
+    "training_load_ratio": 1.0,
+    "tired_rate": 1.0,
+    "ati": 104.0,
+    "cti": 103.0,
+    "performance": 2,
+    "distance": 0.0,
+    "duration": 0,
+    "vo2max": 56,
+    "lthr": 167,
+    "ltsp": 262,
+    "stamina_level": 86.7,
+    "stamina_level_7d": 101.0
+  },
+  "sleep_data": {
+    "date": "20260629",
+    "total_duration_minutes": 311,
+    "phases": {
+      "deep_minutes": 81,
+      "light_minutes": 172,
+      "rem_minutes": 58,
+      "awake_minutes": 8,
+      "nap_minutes": null
+    },
+    "avg_hr": 51,
+    "min_hr": 47,
+    "max_hr": 60,
+    "quality_score": null
+  },
+  "summary": {
+    "total_load": 84,
+    "total_calories": 749.6,
+    "total_duration": 40,
+    "workout_count": 3
+  }
+}
