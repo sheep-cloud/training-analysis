@@ -1,0 +1,51 @@
+{
+  "date": "2026-07-01",
+  "strength_training": [],
+  "cardio_activities": [],
+  "daily_metrics": {
+    "date": "20260701",
+    "avg_sleep_hrv": 62.0,
+    "baseline": 67.0,
+    "interval_list": [
+      5,
+      47,
+      57,
+      77
+    ],
+    "rhr": 51,
+    "training_load": 0,
+    "training_load_ratio": 0.95,
+    "tired_rate": -5.0,
+    "ati": 97.0,
+    "cti": 102.0,
+    "performance": -1,
+    "distance": 0.0,
+    "duration": 0,
+    "vo2max": null,
+    "lthr": null,
+    "ltsp": null,
+    "stamina_level": null,
+    "stamina_level_7d": null
+  },
+  "sleep_data": {
+    "date": "20260701",
+    "total_duration_minutes": 356,
+    "phases": {
+      "deep_minutes": 72,
+      "light_minutes": 204,
+      "rem_minutes": 80,
+      "awake_minutes": 29,
+      "nap_minutes": 132
+    },
+    "avg_hr": 53,
+    "min_hr": 39,
+    "max_hr": 64,
+    "quality_score": null
+  },
+  "summary": {
+    "total_load": 0,
+    "total_calories": 0,
+    "total_duration": 0,
+    "workout_count": 0
+  }
+}
