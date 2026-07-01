@@ -29,9 +29,9 @@ Write-Host ""
 Write-Host "⏳ 正在运行脚本..." -ForegroundColor Cyan
 python scripts/generate_report.py --date $Date
 
-# 3. 提交到 Gitee
+# 3. 提交到 GitHub
 Write-Host ""
-Write-Host "📤 正在提交到 Gitee..." -ForegroundColor Cyan
+Write-Host "📤 正在提交到 GitHub..." -ForegroundColor Cyan
 
 # data/daily/*.json 被 .gitignore 忽略,需 -f 强制加入
 git add -f "public/daily/$Date.html" "data/daily/$Date.json" "data/daily/summary.json"
@@ -50,7 +50,7 @@ if (-not $stagedFiles) {
 else {
     git commit -m "chore: daily training report - $Date"
     git push origin master
-    Write-Host "✅ 已推送到 Gitee" -ForegroundColor Green
+    Write-Host "✅ 已推送到 GitHub" -ForegroundColor Green
 }
 
 Write-Host ""

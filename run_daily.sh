@@ -12,7 +12,7 @@ DATE=${1:-$(date +%Y-%m-%d)}
 DAY_COMPACT=${DATE//-/}
 
 # coros-mcp 可执行文件;如已在 PATH 可直接用 "coros-mcp"
-COROS_MCP=${COROS_MCP:-coros-mcp}
+COROS_MCP=${COROS_MCP:-/c/Develop/Workspaces/AIProjects/cygnusb/coros-mcp/.venv/Scripts/coros-mcp.exe}
 
 echo "🚀 开始生成 $DATE 的训练报告..."
 echo ""
@@ -25,9 +25,9 @@ echo "🔄 正在同步高驰数据 ($DAY_COMPACT)..."
 echo ""
 python scripts/generate_report.py --date "$DATE"
 
-# 3. 提交到 Gitee
+# 3. 提交到 GitHub
 echo ""
-echo "📤 正在提交到 Gitee..."
+echo "📤 正在提交到 GitHub..."
 
 # data/daily/*.json 被 .gitignore 忽略,需 -f 强制加入
 git add -f public/daily/"$DATE".html data/daily/"$DATE".json data/daily/summary.json
@@ -44,7 +44,7 @@ if git diff --cached --quiet; then
 else
     git commit -m "chore: daily training report - $DATE"
     git push origin master
-    echo "✅ 已推送到 Gitee"
+    echo "✅ 已推送到 GitHub"
 fi
 
 echo ""

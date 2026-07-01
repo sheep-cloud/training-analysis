@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-每日训练数据分析平台。核心是单个 Python 脚本,把两个数据源(力量训练 + 有氧/生理指标)融合成结构化 JSON 与 HTML 报告,按日期归档,推送到 Gitee 后由 Vercel 部署展示。
+每日训练数据分析平台。核心是单个 Python 脚本,把两个数据源(力量训练 + 有氧/生理指标)融合成结构化 JSON 与 HTML 报告,按日期归档,推送到 GitHub 后由 Vercel 部署展示。
 
 纯 Python 3 标准库,**无第三方依赖、无构建步骤、无测试套件、无 lint 配置**。
 
@@ -55,5 +55,5 @@ bash run_daily.sh [YYYY-MM-DD]    # Linux/Mac,默认今天
 - **分支不一致**:仓库当前分支为 `master`,但 `run_daily.{sh,ps1}` 硬编码 `git push origin main`。直接运行会推错分支或失败,改脚本或建分支前先确认目标分支。
 - **.gitignore 与提交冲突**:`.gitignore` 忽略 `data/daily/*.json`(仅保留 `.gitkeep`),而 `run_daily` 脚本与 README 又要 `git add data/daily/{date}.json`。对**新日期**的 json,不带 `-f` 的 `git add` 会被忽略规则拒绝。
 - **xunji skill 自带按日缓存**:`fetch_trains.py` 把结果缓存在 `.claude/skills/xunji-api/cache/`(按 `datestr`),同一天重复生成会命中缓存、不重新请求接口。若在训记 App 里改了数据但报告没更新,先清该目录再重跑。
-- **部署链路**:`git push` 到 Gitee → Vercel 自动构建(无需额外配置),报告经 `public/daily/{date}.html` 直接访问。
-- README 有三份:`README_CN.md` 是真实文档,`README.md` / `README.en.md` 仍是 Gitee 模板占位符。
+- **部署链路**:`git push` 到 GitHub → Vercel 自动构建(无需额外配置),报告经 `public/daily/{date}.html` 直接访问。
+- README 只保留 `README.md`，内容已更新为正确的项目文档。
