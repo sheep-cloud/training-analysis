@@ -27,7 +27,7 @@ try {
 # 2. 运行 Python 脚本
 Write-Host ""
 Write-Host "⏳ 正在运行脚本..." -ForegroundColor Cyan
-python scripts/generate_report.py --date $Date
+py scripts/generate_report.py --date $Date
 
 # 3. 提交到 GitHub
 Write-Host ""

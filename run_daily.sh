@@ -19,11 +19,11 @@ echo ""
 
 # 1. 同步高驰数据到本地缓存(失败不中断,容忍离线/已同步)
 echo "🔄 正在同步高驰数据 ($DAY_COMPACT)..."
-"$COROS_MCP" sync --from "$DAY_COMPACT" --to "$DAY_COMPACT" || echo "⚠️  高驰同步失败,使用现有缓存继续"
+PYTHONUTF8=1 "$COROS_MCP" sync --from "$DAY_COMPACT" --to "$DAY_COMPACT" || echo "⚠️  高驰同步失败,使用现有缓存继续"
 
 # 2. 运行 Python 脚本
 echo ""
-python scripts/generate_report.py --date "$DATE"
+py scripts/generate_report.py --date "$DATE"
 
 # 3. 提交到 GitHub
 echo ""
