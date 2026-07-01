@@ -42,7 +42,7 @@ fi
 if git diff --cached --quiet; then
     echo "ℹ️  没有新的文件需要提交"
 else
-    git commit -m "chore: daily training report - $DATE"
+    git commit -m "chore(训练报告): $DATE"
     git push origin master
     echo "✅ 已推送到 GitHub"
 fi
@@ -50,4 +50,4 @@ fi
 echo ""
 echo "✨ 完成！"
 echo ""
-echo "📊 访问地址: https://training-analysis.vercel.app/public/daily/$DATE.html"
+echo "📊 访问地址: https://sheep-cloud.github.io/training-analysis/public/daily/$DATE.html"

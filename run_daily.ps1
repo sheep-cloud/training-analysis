@@ -48,7 +48,7 @@ if (-not $stagedFiles) {
     Write-Host "ℹ️  没有新的文件需要提交" -ForegroundColor Yellow
 }
 else {
-    git commit -m "chore: daily training report - $Date"
+    git commit -m "chore(训练报告): $Date"
     git push origin master
     Write-Host "✅ 已推送到 GitHub" -ForegroundColor Green
 }
@@ -56,4 +56,4 @@ else {
 Write-Host ""
 Write-Host "✨ 完成！" -ForegroundColor Green
 Write-Host ""
-Write-Host "📊 访问地址: https://training-analysis.vercel.app/public/daily/$Date.html" -ForegroundColor Cyan
+Write-Host "📊 访问地址: https://sheep-cloud.github.io/training-analysis/public/daily/$Date.html" -ForegroundColor Cyan

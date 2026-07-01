@@ -7,7 +7,7 @@
 ✅ **数据融合** - 自动合并训记 + 高驰的训练数据  
 ✅ **自动生成** - 每日报告自动生成为 HTML 和 JSON  
 ✅ **版本管理** - 历史记录保存在 Git  
-✅ **外网访问** - 通过 Vercel + CDN 全球加速  
+✅ **外网访问** - 通过 GitHub Pages 发布  
 ✅ **渐进式** - 从日报告逐步扩展到周月分析  
 
 ## 项目结构
@@ -75,9 +75,9 @@ python scripts/generate_report.py --date 2026-06-30
 - **JSON 数据**: `data/daily/2026-06-30.json`
 - **HTML 报告**: `public/daily/2026-06-30.html`
 
-推送到 GitHub 后，通过 Vercel 访问：
+推送到 GitHub 后，通过 GitHub Pages 访问：
 ```
-https://training-analysis.vercel.app/public/daily/2026-06-30.html
+https://sheep-cloud.github.io/training-analysis/public/daily/2026-06-30.html
 ```
 
 ## 数据源
@@ -92,24 +92,24 @@ https://training-analysis.vercel.app/public/daily/2026-06-30.html
 - 生理指标（HRV、训练负荷、心率等）
 - 睡眠数据（深睡、浅睡、REM）
 
-## 部署（Vercel + GitHub）
+## 部署（GitHub Pages）
 
-### 第一步：连接 Vercel
+### 第一步：开启 GitHub Pages
 
-1. 访问 https://vercel.com
-2. **Add New** → **Project**
-3. 选择 **Import Git Repository** → **GitHub**
-4. 授权并选择 `training-analysis` 仓库
-5. 框架选 **Other**，Output Directory 填 `public`
-6. Deploy
+1. 打开仓库 https://github.com/sheep-cloud/training-analysis
+2. 进入 **Settings → Pages**
+3. **Source** 选择 `Deploy from a branch`
+4. Branch 选择 `master`，目录选择 `/(root)`
+5. 点击 **Save**
 
 ### 第二步：自动部署
 
-每次 `git push` 到 GitHub，Vercel 会自动：
-1. 检测新推送
-2. 构建项目（无需额外配置）
-3. 部署到 CDN
-4. 更新 URL
+每次 `git push` 到 GitHub，GitHub Pages 会自动重新构建并部署。
+
+1-2 分钟后即可通过以下地址访问：
+```
+https://sheep-cloud.github.io/training-analysis/public/daily/2026-06-30.html
+```
 
 ## 开发路线图
 
@@ -149,14 +149,14 @@ https://training-analysis.vercel.app/public/daily/2026-06-30.html
 4. 清除训记缓存：删除 `.claude/skills/xunji-api/cache/` 目录
 
 ### Q: 如何访问旧报告？
-**A:** 访问 `https://training-analysis.vercel.app/public/daily/日期.html`
+**A:** 访问 `https://sheep-cloud.github.io/training-analysis/public/daily/日期.html`
 
 ## 技术栈
 
 - **数据源**: xunji-api skill + Coros MCP
 - **处理**: Python 3（纯标准库，无第三方依赖）
 - **存储**: Git (GitHub)
-- **部署**: Vercel
+- **部署**: GitHub Pages
 - **展示**: HTML + CSS + JSON
 
 ## 许可证
