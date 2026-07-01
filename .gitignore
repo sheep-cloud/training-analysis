@@ -17,6 +17,17 @@ build/
 *.swo
 *~
 
+# 本地配置与密钥
+.env
+.env.*
+!.env.example
+.codex/
+.claude/settings.local.json
+
+# Skill 缓存
+.agents/skills/*/cache/
+.claude/skills/*/cache/
+
 # OS
 .DS_Store
 Thumbs.db

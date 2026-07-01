@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "coros": {
+      "command": "${COROS_MCP_HOME:-C:/Develop/Workspaces/AIProjects/cygnusb/coros-mcp}/.venv/Scripts/coros-mcp.exe",
+      "args": [
+        "serve"
+      ]
+    }
+  }
+}
