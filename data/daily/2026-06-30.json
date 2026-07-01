@@ -1,0 +1,382 @@
+{
+  "date": "2026-06-30",
+  "strength_training": [
+    {
+      "title": "背部",
+      "start_time": 1782792312654,
+      "end_time": 1782795795126,
+      "duration_minutes": 58,
+      "calories": 269.2,
+      "training_load": 9,
+      "movements": [
+        {
+          "name": "哑铃划船（手扶）",
+          "sets": [
+            {
+              "done": true,
+              "weight": "20",
+              "unit": "kg",
+              "reps": "15",
+              "time": 1,
+              "rpe": "",
+              "note": "",
+              "set_type": "热",
+              "rest_seconds": 75,
+              "left_weight": "60"
+            },
+            {
+              "done": true,
+              "weight": "30",
+              "unit": "kg",
+              "reps": "12",
+              "time": 1,
+              "rpe": "",
+              "note": "",
+              "set_type": "热",
+              "rest_seconds": 75,
+              "left_weight": "60"
+            },
+            {
+              "done": true,
+              "weight": "40",
+              "unit": "kg",
+              "reps": "10",
+              "time": 1,
+              "rpe": "",
+              "note": "",
+              "set_type": "热",
+              "rest_seconds": 75,
+              "left_weight": "60"
+            },
+            {
+              "done": true,
+              "weight": "50",
+              "unit": "kg",
+              "reps": "10",
+              "time": 75,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 75,
+              "left_weight": "50"
+            },
+            {
+              "done": true,
+              "weight": "50",
+              "unit": "kg",
+              "reps": "10",
+              "time": 75,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 75,
+              "left_weight": "50"
+            },
+            {
+              "done": true,
+              "weight": "50",
+              "unit": "kg",
+              "reps": "10",
+              "time": 75,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 75,
+              "left_weight": "50"
+            },
+            {
+              "done": true,
+              "weight": "50",
+              "unit": "kg",
+              "reps": "10",
+              "time": 75,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 75,
+              "left_weight": "50"
+            }
+          ]
+        },
+        {
+          "name": "对握高位下拉",
+          "sets": [
+            {
+              "done": true,
+              "weight": "59",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "59"
+            },
+            {
+              "done": true,
+              "weight": "59",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "59"
+            },
+            {
+              "done": true,
+              "weight": "59",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "59"
+            },
+            {
+              "done": true,
+              "weight": "59",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "59"
+            }
+          ]
+        },
+        {
+          "name": "窄握把手下拉",
+          "sets": [
+            {
+              "done": true,
+              "weight": "63.5",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "63.5"
+            },
+            {
+              "done": true,
+              "weight": "63.5",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "63.5"
+            },
+            {
+              "done": true,
+              "weight": "68",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "68"
+            },
+            {
+              "done": true,
+              "weight": "68",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "68"
+            }
+          ]
+        },
+        {
+          "name": "器械划船2",
+          "sets": [
+            {
+              "done": true,
+              "weight": "63.5",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "63.5"
+            },
+            {
+              "done": true,
+              "weight": "59",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "59"
+            },
+            {
+              "done": true,
+              "weight": "59",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "59"
+            },
+            {
+              "done": true,
+              "weight": "59",
+              "unit": "kg",
+              "reps": "12",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "59"
+            }
+          ]
+        },
+        {
+          "name": "引体向上(负重)",
+          "sets": [
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": null,
+              "left_weight": null
+            },
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": null,
+              "left_weight": null
+            },
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": null,
+              "left_weight": null
+            },
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": null,
+              "left_weight": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "cardio_activities": [
+    {
+      "name": "广州市 飞盘",
+      "sport_type": 1100,
+      "duration_seconds": 6579,
+      "distance_meters": 3560.45,
+      "avg_hr": 114,
+      "calories": 670.2,
+      "training_load": 78
+    },
+    {
+      "name": "速度间歇",
+      "sport_type": 101,
+      "duration_seconds": 2776,
+      "distance_meters": 8455.36,
+      "avg_hr": 139,
+      "calories": 389.6,
+      "training_load": 79
+    }
+  ],
+  "daily_metrics": {
+    "date": "20260630",
+    "avg_sleep_hrv": 59.0,
+    "baseline": 67.0,
+    "interval_list": [
+      5,
+      47,
+      57,
+      77
+    ],
+    "rhr": 49,
+    "training_load": 166,
+    "training_load_ratio": 1.08,
+    "tired_rate": 9.0,
+    "ati": 113.0,
+    "cti": 104.0,
+    "performance": 2,
+    "distance": 0.0,
+    "duration": 0,
+    "vo2max": 56,
+    "lthr": 167,
+    "ltsp": 262,
+    "stamina_level": 86.7,
+    "stamina_level_7d": 101.0
+  },
+  "sleep_data": {
+    "date": "20260630",
+    "total_duration_minutes": 275,
+    "phases": {
+      "deep_minutes": 78,
+      "light_minutes": 145,
+      "rem_minutes": 52,
+      "awake_minutes": 56,
+      "nap_minutes": null
+    },
+    "avg_hr": 51,
+    "min_hr": 47,
+    "max_hr": 63,
+    "quality_score": null
+  },
+  "summary": {
+    "total_load": 166,
+    "total_calories": 1329.0,
+    "total_duration": 155,
+    "workout_count": 3
+  }
+}
