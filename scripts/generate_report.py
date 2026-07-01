@@ -5,6 +5,7 @@ Training analysis report generator
 Merges data from Xunji App (xunji-api) + Coros App (Coros)
 """
 
+import html
 import json
 import os
 import sys
@@ -29,25 +30,23 @@ COROS_CACHE_DB = Path.home() / ".config" / "coros-mcp" / "cache.db"
 # Coros sport_type values that are strength training (overlap with Xunji data)
 STRENGTH_SPORT_TYPES = {402}
 
-# Coros sport_type values that count as a "workout" for the daily summary card
-# (strength is counted via Xunji; this set tracks cardio/ball/other sports from Coros)
-CARDIO_SPORT_TYPES = {
-    1,    # 跑步（跑步机）
-    2,    # 室内骑行
-    100,  # 跑步
-    101,  # 跑步（alt）
-    102,  # 越野跑
-    103,  # 场地跑
-    200,  # 公路骑行
-    201,  # 室内骑行（alt）
-    300,  # 游泳
-    401,  # 飞盘
-    403,  # 乒乓球
-    404,  # 骑行（通用）
+# Sport type -> category name for grouping cardio sections
+SPORT_TYPE_CATEGORIES = {
+    1: "跑步",
+    2: "骑行",
+    100: "跑步",
+    101: "跑步",
+    102: "越野跑",
+    103: "跑步",
+    200: "骑行",
+    201: "骑行",
+    300: "游泳",
+    401: "飞盘",
+    403: "乒乓球",
+    404: "骑行",
+    1100: "飞盘",
 }
 
-
-# ── tiny helpers shared across the pipeline ──
 
 def _num(value, default=0):
     """None-safe numeric accessor; returns *value* if it is a number, else *default*."""
@@ -56,17 +55,44 @@ def _num(value, default=0):
 
 def _esc(value):
     """HTML-escape a string value so it can be safely embedded in markup."""
-    import html
     if value is None:
         return ""
     return html.escape(str(value))
 
 
+def _fmt_ts(ts_ms):
+    """Format millisecond timestamp to HH:MM."""
+    if not ts_ms:
+        return "-"
+    try:
+        return datetime.fromtimestamp(ts_ms / 1000).strftime("%H:%M")
+    except (OSError, ValueError, OverflowError):
+        return "-"
+
+
+def _fmt_duration(minutes):
+    """Format minutes to 'X小时Y分' or 'X分'."""
+    if minutes is None:
+        return "-"
+    minutes = int(minutes)
+    if minutes >= 60:
+        return f"{minutes // 60} 小时 {minutes % 60} 分"
+    return f"{minutes} 分"
+
+
+def _pace(minutes, km):
+    """Compute min/km pace."""
+    if not km:
+        return "-"
+    total_sec = minutes * 60
+    pace_sec = total_sec / km
+    m = int(pace_sec // 60)
+    s = int(pace_sec % 60)
+    return f"{m}:{s:02d}"
+
+
 def fetch_xunji_data(date_str):
-    """
-    Get data from Xunji App (via xunji-api skill)
-    Returns complete training data
-    """
+    """Get data from Xunji App (via xunji-api skill)."""
     try:
         cmd = [
             "python",
@@ -75,9 +101,6 @@ def fetch_xunji_data(date_str):
             "--date", date_str,
             "--full"
         ]
-        # encoding="utf-8" is required: the skill script outputs UTF-8, but on
-        # Windows subprocess defaults to GBK and crashes on Chinese bytes,
-        # silently turning stdout into None and dropping all strength data.
         result = subprocess.run(
             cmd, capture_output=True, text=True, encoding="utf-8", cwd=PROJECT_ROOT
         )
@@ -90,8 +113,6 @@ def fetch_xunji_data(date_str):
             data = json.loads(result.stdout)
         except (json.JSONDecodeError, TypeError) as e:
             print(f"[WARN] Xunji output not valid JSON: {e}")
-            print(f"       stdout head: {(result.stdout or '')[:200]!r}")
-            print(f"       stderr head: {(result.stderr or '')[:200]!r}")
             return None
 
         return data.get("res", {})
@@ -101,21 +122,13 @@ def fetch_xunji_data(date_str):
 
 
 def fetch_coros_data(date_str):
-    """
-    Get data from Coros App by reading the coros-mcp local SQLite cache
-    (~/.config/coros-mcp/cache.db), populated by `coros-mcp sync`.
-
-    Returns {"activities": [...], "daily_metrics": {...}, "sleep_data": {...}}.
-    Degrades gracefully to empty structures if the cache is missing/empty.
-    """
+    """Read coros-mcp local SQLite cache."""
     empty = {"activities": [], "daily_metrics": {}, "sleep_data": {}}
 
     if not COROS_CACHE_DB.exists():
         print(f"[WARN] Coros cache not found: {COROS_CACHE_DB}")
-        print("       Run `coros-mcp sync` first to populate it.")
         return empty
 
-    # merge keys on YYYYMMDD; date_str arrives as YYYY-MM-DD
     day = date_str.replace("-", "")
 
     try:
@@ -127,95 +140,56 @@ def fetch_coros_data(date_str):
             "SELECT data FROM activities WHERE start_day = ? ORDER BY start_day", (day,)
         ):
             act = json.loads(row["data"])
-            # cache stores start/end as raw UTC Unix-seconds strings; normalize
-            # to int epoch seconds so we can window-match Xunji strength
-            # sessions (also epoch seconds) by absolute-time overlap.
-            st = act.get("start_time")
-            et = act.get("end_time")
-            act["start_ts"] = _coros_ts_to_epoch(st)
-            act["end_ts"] = _coros_ts_to_epoch(et)
+            act["start_ts"] = _coros_ts_to_epoch(act.get("start_time"))
+            act["end_ts"] = _coros_ts_to_epoch(act.get("end_time"))
             activities.append(act)
 
         daily_metrics = {}
-        drow = con.execute(
-            "SELECT data FROM daily_records WHERE date = ?", (day,)
-        ).fetchone()
+        drow = con.execute("SELECT data FROM daily_records WHERE date = ?", (day,)).fetchone()
         if drow:
             daily_metrics = json.loads(drow["data"])
 
         sleep_data = {}
-        srow = con.execute(
-            "SELECT data FROM sleep_records WHERE date = ?", (day,)
-        ).fetchone()
+        srow = con.execute("SELECT data FROM sleep_records WHERE date = ?", (day,)).fetchone()
         if srow:
             sleep_data = json.loads(srow["data"])
 
         con.close()
-
-        if not activities and not daily_metrics and not sleep_data:
-            print(f"[WARN] Coros cache has no data for {date_str}. Run `coros-mcp sync`.")
-
-        return {
-            "activities": activities,
-            "daily_metrics": daily_metrics,
-            "sleep_data": sleep_data,
-        }
+        return {"activities": activities, "daily_metrics": daily_metrics, "sleep_data": sleep_data}
 
     except Exception as e:
         print(f"[WARN] Coros cache read error: {e}")
         return empty
 
+
 def _coros_ts_to_epoch(value):
-    """Coros cache start_time/end_time is a UTC Unix seconds (or ms) string.
-    Return epoch seconds (int) or None."""
     if not value:
         return None
     s = str(value)
     if s.isdigit():
-        if len(s) == 13:  # milliseconds
+        if len(s) == 13:
             return int(s) // 1000
-        if len(s) == 10:  # seconds
+        if len(s) == 10:
             return int(s)
     return None
 
 
 def _intervals_overlap(a_start, a_end, b_start, b_end):
-    """True if two [start, end] epoch-second intervals overlap. None-safe."""
     if None in (a_start, a_end, b_start, b_end):
         return False
     return a_start <= b_end and b_start <= a_end
 
 
 def merge_training_data(xunji_data, coros_data, date_str):
-    """
-    Merge data from Xunji and Coros.
-
-    Rules (confirmed with user):
-    - Xunji is the source of truth for strength training DETAILS (movements/sets).
-    - Coros and Xunji both log the same strength session; match them by time
-      window overlap and attach Coros calories/training_load onto the Xunji row.
-    - Coros strength activities with no matching Xunji session are kept as a
-      detail-less strength_training row (calories/load only).
-    - Calories and training_load always come from Coros (calories in cal -> /1000).
-    - Non-strength Coros activities (running, etc.) go to cardio_activities.
-    - daily_metrics / sleep_data are attached as-is.
-    """
-
     merged = {
         "date": date_str,
         "strength_training": [],
         "cardio_activities": [],
         "daily_metrics": {},
         "sleep_data": {},
-        "summary": {
-            "total_load": 0,
-            "total_calories": 0,
-            "total_duration": 0,
-            "workout_count": 0
-        }
+        "summary": {"total_load": 0, "total_calories": 0, "total_duration": 0, "workout_count": 0}
     }
 
-    # Split Coros activities into strength (for dedup) vs cardio
     coros_strength = []
     coros_cardio = []
     if coros_data and coros_data.get("activities"):
@@ -225,7 +199,7 @@ def merge_training_data(xunji_data, coros_data, date_str):
             else:
                 coros_cardio.append(activity)
 
-    # --- Xunji strength training (source of truth for details) ---
+    # Xunji strength training
     if xunji_data and "trains" in xunji_data:
         for train in xunji_data["trains"]:
             t_start = train.get("start", 0)
@@ -235,16 +209,13 @@ def merge_training_data(xunji_data, coros_data, date_str):
                 "start_time": t_start,
                 "end_time": t_end,
                 "duration_minutes": (t_end - t_start) // 60000,
-                "calories": None,        # filled from matched Coros activity
-                "training_load": None,   # filled from matched Coros activity
+                "calories": None,
+                "training_load": None,
                 "movements": []
             }
 
             for movement in train.get("movements", []):
-                move_info = {
-                    "name": movement.get("name", "Unknown"),
-                    "sets": []
-                }
+                move_info = {"name": movement.get("name", "Unknown"), "sets": []}
                 for set_data in movement.get("sets", []):
                     move_info["sets"].append({
                         "done": set_data.get("done", True),
@@ -260,20 +231,19 @@ def merge_training_data(xunji_data, coros_data, date_str):
                     })
                 train_info["movements"].append(move_info)
 
-            # Match a Coros strength activity by time-window overlap (Xunji ms -> s)
             t_start_s = t_start // 1000 if t_start else None
             t_end_s = t_end // 1000 if t_end else None
             for ca in list(coros_strength):
                 if _intervals_overlap(t_start_s, t_end_s, ca.get("start_ts"), ca.get("end_ts")):
                     train_info["calories"] = round(_num(ca.get("calories")) / 1000, 1)
                     train_info["training_load"] = _num(ca.get("training_load"))
-                    coros_strength.remove(ca)  # consumed; won't become an orphan
+                    coros_strength.remove(ca)
                     break
 
             merged["strength_training"].append(train_info)
             merged["summary"]["workout_count"] += 1
 
-    # --- Orphan Coros strength activities (no Xunji detail) ---
+    # Orphan Coros strength
     for ca in coros_strength:
         merged["strength_training"].append({
             "title": ca.get("name", "Strength"),
@@ -282,33 +252,30 @@ def merge_training_data(xunji_data, coros_data, date_str):
             "duration_minutes": (ca.get("duration_seconds", 0) // 60),
             "calories": round(_num(ca.get("calories")) / 1000, 1),
             "training_load": _num(ca.get("training_load")),
-            "movements": []  # no detail available from Coros
+            "movements": []
         })
         merged["summary"]["workout_count"] += 1
 
-    # --- Coros cardio activities ---
+    # Coros cardio activities
     for activity in coros_cardio:
         merged["cardio_activities"].append({
             "name": activity.get("name", "Unknown"),
             "sport_type": activity.get("sport_type"),
             "duration_seconds": activity.get("duration_seconds", 0),
             "distance_meters": activity.get("distance_meters", 0),
-            "avg_hr": activity.get("avg_hr"),    # may be None — renderer handles it
+            "avg_hr": activity.get("avg_hr"),
             "calories": round(_num(activity.get("calories")) / 1000, 1),
             "training_load": _num(activity.get("training_load"))
         })
         merged["summary"]["total_duration"] += activity.get("duration_seconds", 0)
-        merged["summary"]["workout_count"] += 1  # cardio sports count as workouts
+        merged["summary"]["workout_count"] += 1
 
-    # --- Summary: calories & load always from Coros (every activity) ---
-    # total_calories / total_load across every Coros activity (strength + cardio)
     all_coros = (coros_data.get("activities", []) if coros_data else [])
     for a in all_coros:
         merged["summary"]["total_calories"] += _num(a.get("calories")) / 1000
         merged["summary"]["total_load"] += _num(a.get("training_load"))
     merged["summary"]["total_calories"] = round(merged["summary"]["total_calories"], 1)
 
-    # daily metrics / sleep
     if coros_data:
         merged["daily_metrics"] = coros_data.get("daily_metrics", {})
         merged["sleep_data"] = coros_data.get("sleep_data", {})
@@ -319,635 +286,641 @@ def merge_training_data(xunji_data, coros_data, date_str):
 
 
 def save_json_data(merged_data, date_str):
-    """Save merged data as JSON"""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-
     json_file = DATA_DIR / f"{date_str}.json"
     with open(json_file, "w", encoding="utf-8") as f:
         json.dump(merged_data, f, indent=2, ensure_ascii=False)
-
     print(f"[OK] JSON data saved: {json_file}")
     return json_file
 
 
-def generate_html_report(merged_data, date_str):
-    """Generate HTML report"""
+# ── HTML generation ──
 
-    html_content = f"""<!DOCTYPE html>
+CSS = """
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #0d0d0d;
+    color: #f5f5f7;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+.container { max-width: 900px; margin: 0 auto; }
+.header { text-align: center; margin-bottom: 32px; }
+.header .date { color: #8e8e93; font-size: 14px; margin-bottom: 6px; }
+.header h1 { font-size: 32px; font-weight: 700; letter-spacing: 1px; }
+.header .subtitle { color: #00d4aa; font-size: 16px; margin-top: 8px; }
+
+.global-toggle { text-align: center; margin-bottom: 24px; }
+.global-toggle button {
+    background: #1c1c1e; color: #00d4aa; border: 1px solid #00d4aa;
+    padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 14px; margin: 0 6px;
+}
+.global-toggle button:hover { background: #232326; }
+
+.overview-card { background: #1c1c1e; border-radius: 20px; padding: 28px; margin-bottom: 24px; }
+.overview-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.overview-title { font-size: 20px; font-weight: 600; }
+.ring-wrap { position: relative; width: 110px; height: 110px; }
+.ring-bg, .ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; }
+.ring-bg { stroke: #2c2c2e; }
+.ring-fill { stroke: #00d4aa; stroke-dasharray: 259 345; }
+.ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+.ring-text .num { font-size: 26px; font-weight: 700; }
+.ring-text .label { font-size: 12px; color: #8e8e93; }
+.overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.overview-item { text-align: center; }
+.overview-item .value { font-size: 26px; font-weight: 700; color: #fff; }
+.overview-item .label { font-size: 12px; color: #8e8e93; margin-top: 4px; }
+
+.section { margin-bottom: 16px; }
+.fold-card { background: #1c1c1e; border-radius: 16px; overflow: hidden; }
+.fold-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 20px; cursor: pointer; user-select: none;
+}
+.fold-header:hover { background: #232326; }
+.fold-title { display: flex; align-items: center; gap: 10px; }
+.fold-title .icon-emoji { font-size: 22px; }
+.fold-title .text { font-size: 18px; font-weight: 700; }
+.fold-title .badge {
+    background: #2c2c2e; color: #8e8e93; font-size: 12px;
+    padding: 3px 10px; border-radius: 12px; margin-left: 8px;
+}
+.fold-arrow { font-size: 14px; color: #8e8e93; transition: transform 0.2s; }
+.fold-card.open .fold-arrow { transform: rotate(180deg); }
+.fold-body { display: none; padding: 0 20px 20px; }
+.fold-card.open .fold-body { display: block; }
+
+.card { background: #1c1c1e; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+.detail-row { font-size: 12px; color: #8e8e93; margin-top: 6px; display: flex; gap: 16px; flex-wrap: wrap; }
+.detail-row span { color: #f5f5f7; }
+
+.strength-summary { display: flex; gap: 24px; font-size: 13px; color: #8e8e93; margin-bottom: 16px; flex-wrap: wrap; }
+.strength-summary span { color: #00d4aa; font-weight: 600; }
+.movement { display: flex; align-items: flex-start; gap: 14px; padding: 16px 0; border-bottom: 1px solid #2c2c2e; }
+.movement:last-child { border-bottom: none; padding-bottom: 0; }
+.movement:first-child { padding-top: 0; }
+.movement-num { width: 36px; height: 36px; border-radius: 50%; background: #2c2c2e; color: #00d4aa; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.movement-info { flex: 1; }
+.movement-name { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+.sets-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.set-tag { background: #2c2c2e; padding: 8px 12px; border-radius: 10px; font-size: 13px; color: #f5f5f7; }
+.set-tag .main { font-weight: 600; }
+.set-tag .type { color: #ff9f0a; font-size: 11px; margin-right: 4px; }
+.set-tag .rest { color: #8e8e93; font-size: 11px; margin-left: 4px; }
+.set-tag .extra { color: #8e8e93; font-size: 11px; margin-left: 4px; }
+.mov-detail { color: #8e8e93; font-size: 12px; margin-top: 8px; }
+.mov-detail span { color: #f5f5f7; }
+
+.activity-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 14px; }
+.activity-grid .item .num { font-size: 22px; font-weight: 700; }
+.activity-grid .item .label { font-size: 12px; color: #8e8e93; margin-top: 2px; }
+
+.metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.metric-card { background: #1c1c1e; border-radius: 16px; padding: 18px; }
+.metric-card .label { font-size: 12px; color: #8e8e93; margin-bottom: 8px; }
+.metric-card .value { font-size: 24px; font-weight: 700; }
+.metric-card .unit { font-size: 12px; color: #8e8e93; margin-left: 2px; }
+.metric-card .sub { font-size: 11px; color: #8e8e93; margin-top: 6px; }
+
+.sleep-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.sleep-time { font-size: 32px; font-weight: 700; }
+.sleep-quality { background: #2c2c2e; padding: 6px 14px; border-radius: 20px; font-size: 14px; color: #00d4aa; }
+.sleep-bar { height: 14px; border-radius: 7px; background: #2c2c2e; overflow: hidden; display: flex; margin-bottom: 14px; }
+.sleep-bar span { height: 100%; }
+.deep { background: #0a84ff; }
+.light { background: #64d2ff; }
+.rem { background: #bf5af2; }
+.awake { background: #ff9f0a; }
+.sleep-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.sleep-hr { color: #8e8e93; font-size: 13px; margin-top: 16px; }
+
+.analysis-card { background: #161618; border-radius: 14px; padding: 18px; margin-bottom: 12px; }
+.analysis-card h3 { font-size: 15px; color: #00d4aa; margin-bottom: 10px; }
+.analysis-card ul { list-style: none; }
+.analysis-card li { padding: 5px 0; font-size: 13px; line-height: 1.6; color: #d1d1d6; border-bottom: 1px solid #2c2c2e; }
+.analysis-card li:last-child { border-bottom: none; }
+.analysis-card .highlight { color: #fff; font-weight: 600; }
+.analysis-card .warn { color: #ff9f0a; }
+.analysis-card .good { color: #00d4aa; }
+
+.footer { text-align: center; color: #8e8e93; font-size: 12px; margin-top: 40px; }
+"""
+
+SCRIPT = """
+function toggleCard(card) { card.classList.toggle('open'); }
+function toggleAll(open) {
+    document.querySelectorAll('[data-fold="section"]').forEach(c => {
+        if (open) c.classList.add('open'); else c.classList.remove('open');
+    });
+}
+"""
+
+
+def generate_html_report(merged_data, date_str):
+    weekday = datetime.strptime(date_str, "%Y-%m-%d").strftime("%a").replace("Mon", "周一").replace("Tue", "周二").replace("Wed", "周三").replace("Thu", "周四").replace("Fri", "周五").replace("Sat", "周六").replace("Sun", "周日")
+
+    overview_ring_value = merged_data['summary']['total_load']
+
+    return f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>训练分析报告 - {date_str}</title>
-    <style>
-        * {{
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }}
-
-        body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }}
-
-        .container {{
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }}
-
-        .header {{
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
-            text-align: center;
-        }}
-
-        .header h1 {{
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }}
-
-        .content {{
-            padding: 40px;
-        }}
-
-        .section {{
-            margin-bottom: 40px;
-        }}
-
-        .section h2 {{
-            font-size: 1.8em;
-            color: #333;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #667eea;
-        }}
-
-        .stat-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }}
-
-        .stat-card {{
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }}
-
-        .stat-card h3 {{
-            font-size: 0.9em;
-            opacity: 0.9;
-            margin-bottom: 10px;
-        }}
-
-        .stat-card .value {{
-            font-size: 2em;
-            font-weight: 700;
-        }}
-
-        table {{
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            background: #f9f9f9;
-        }}
-
-        th {{
-            background: #667eea;
-            color: white;
-            padding: 15px;
-            text-align: left;
-        }}
-
-        td {{
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
-        }}
-
-        .badge {{
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            background: #d4edda;
-            color: #155724;
-        }}
-
-        .badge-success {{ background: #d4edda; color: #155724; }}
-        .badge-warning {{ background: #fff3cd; color: #856404; }}
-        .badge-danger  {{ background: #f8d7da; color: #721c24; }}
-
-        .alert {{
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid;
-        }}
-
-        .alert-info    {{ background: #e7f3ff; border-color: #0066cc; color: #004085; }}
-        .alert-warning {{ background: #fffbea; border-color: #ffc107; color: #856404; }}
-        .alert-danger  {{ background: #ffe5e5; border-color: #dc3545; color: #721c24; }}
-
-        .recommendation {{
-            background: #f0f4ff;
-            border-left: 4px solid #667eea;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }}
-
-        .recommendation h4 {{
-            color: #667eea;
-            margin-bottom: 8px;
-        }}
-
-        .recommendation p {{
-            color: #555;
-            line-height: 1.6;
-        }}
-
-        .score-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }}
-
-        .score-circle {{
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8em;
-            font-weight: 700;
-            color: white;
-            margin: 0 auto 10px;
-        }}
-
-        .score-good {{ background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }}
-        .score-fair {{ background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }}
-        .score-poor {{ background: linear-gradient(135deg, #ff6a00 0%, #ee0979 100%); }}
-
-        .footer {{
-            background: #f9f9f9;
-            padding: 20px 40px;
-            text-align: center;
-            color: #666;
-            border-top: 1px solid #eee;
-        }}
-    </style>
+    <style>{CSS}</style>
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <div class="date">{date_str} {weekday}</div>
             <h1>训练分析报告</h1>
-            <p>{date_str}</p>
+            <div class="subtitle">今天有 {merged_data['summary']['workout_count']} 练</div>
         </div>
 
-        <div class="content">
-            <!-- 综合分析(若有) -->
-            {generate_analysis_html(merged_data, date_str)}
+        <div class="global-toggle">
+            <button onclick="toggleAll(true)">全部展开</button>
+            <button onclick="toggleAll(false)">全部折叠</button>
+        </div>
 
-            <!-- 当日概览 -->
-            <div class="section">
-                <h2>当日概览</h2>
-                <div class="stat-grid">
-                    <div class="stat-card">
-                        <h3>训练场次</h3>
-                        <div class="value">{merged_data['summary']['workout_count']}</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>有氧时长</h3>
-                        <div class="value">{merged_data['summary']['total_duration']}</div>
-                        <div>分钟</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>消耗热量</h3>
-                        <div class="value">{merged_data['summary']['total_calories']:.0f}</div>
-                        <div>千卡</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>训练负荷</h3>
-                        <div class="value">{merged_data['summary']['total_load']}</div>
+        <div class="overview-card">
+            <div class="overview-top">
+                <div>
+                    <div class="overview-title">今日训练负荷</div>
+                    <div style="color:#8e8e93;font-size:13px;margin-top:8px">力量 + 有氧综合</div>
+                </div>
+                <div class="ring-wrap">
+                    <svg width="110" height="110" viewBox="0 0 120 120">
+                        <circle class="ring-bg" cx="60" cy="60" r="50" transform="rotate(135 60 60)"></circle>
+                        <circle class="ring-fill" cx="60" cy="60" r="50" transform="rotate(135 60 60)"></circle>
+                    </svg>
+                    <div class="ring-text">
+                        <div class="num">{overview_ring_value}</div>
+                        <div class="label">负荷</div>
                     </div>
                 </div>
             </div>
-
-            <!-- 力量训练 -->
-            {generate_strength_html(merged_data)}
-
-            <!-- 有氧运动 -->
-            {generate_cardio_html(merged_data)}
-
-            <!-- 生理指标 -->
-            {generate_metrics_html(merged_data)}
-
-            <!-- 睡眠 -->
-            {generate_sleep_html(merged_data)}
+            <div class="overview-grid">
+                <div class="overview-item"><div class="value">{merged_data['summary']['workout_count']}</div><div class="label">训练场次</div></div>
+                <div class="overview-item"><div class="value">{merged_data['summary']['total_duration']}</div><div class="label">有氧时长(分钟)</div></div>
+                <div class="overview-item"><div class="value">{merged_data['summary']['total_calories']:.0f}</div><div class="label">消耗热量(千卡)</div></div>
+                <div class="overview-item"><div class="value">{sum(t.get('training_load') or 0 for t in merged_data['strength_training'])}</div><div class="label">力量负荷</div></div>
+            </div>
         </div>
+
+        {generate_strength_html(merged_data)}
+        {generate_cardio_html(merged_data)}
+        {generate_metrics_html(merged_data)}
+        {generate_sleep_html(merged_data)}
+        {generate_analysis_html(merged_data)}
 
         <div class="footer">
-            <p>数据来源:训记 App + 高驰 App</p>
-            <p style="margin-top: 10px; font-size: 0.9em;">生成时间:{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+            <p>数据来源: 训记 App + 高驰 App · 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
         </div>
     </div>
+    <script>{SCRIPT}</script>
 </body>
-</html>
-"""
-
-    return html_content
+</html>"""
 
 
 def generate_strength_html(merged_data):
-    """Generate strength training HTML"""
     if not merged_data["strength_training"]:
         return ""
 
-    html = '<div class="section"><h2>力量训练</h2>'
+    total_sets = sum(len(m["sets"]) for t in merged_data["strength_training"] for m in t["movements"])
+    section_badge = f"{len(merged_data['strength_training'])} 场训练 · {total_sets} 组"
 
+    inner_html = ""
     for train in merged_data["strength_training"]:
-        # Coros-sourced calories/load, attached during merge (may be None)
-        extra = []
-        if train.get("calories") is not None:
-            extra.append(f"{train['calories']:.0f} 千卡")
-        if train.get("training_load") is not None:
-            extra.append(f"负荷 {train['training_load']}")
-        extra_str = (" &nbsp;·&nbsp; " + " &nbsp;·&nbsp; ".join(extra)) if extra else ""
-
-        # Orphan Coros strength rows have no movement detail
         if not train["movements"]:
-            html += f"""
-        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #333; margin-bottom: 10px;">{_esc(train['title'])}</h3>
-            <p style="color: #666;">时长:{train['duration_minutes']} 分钟{extra_str}</p>
-            <p style="color: #999; font-size: 0.9em; margin-top: 8px;">无动作明细(仅高驰记录)</p>
-        </div>
-            """
+            inner_html += f"""
+            <div class="fold-card open" style="margin-bottom:14px" data-fold="inner">
+                <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                    <div class="fold-title"><span class="text" style="font-size:16px">{_esc(train['title'])}</span><span class="badge">无明细</span></div>
+                    <div class="fold-arrow">▼</div>
+                </div>
+                <div class="fold-body"><p style="color:#8e8e93;font-size:13px">仅高驰记录，无动作明细</p></div>
+            </div>"""
             continue
 
-        html += f"""
-        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #333; margin-bottom: 15px;">{_esc(train['title'])}</h3>
-            <p style="color: #666; margin-bottom: 10px;">时长:{train['duration_minutes']} 分钟{extra_str}</p>
+        train_sets = sum(len(m["sets"]) for m in train["movements"])
+        train_volume = sum(
+            _num(s.get("weight")) * _num(s.get("reps"))
+            for m in train["movements"] for s in m["sets"]
+        )
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>动作</th>
-                        <th>组</th>
-                        <th>类型</th>
-                        <th>重量</th>
-                        <th>次数</th>
-                        <th>左侧</th>
-                        <th>休息</th>
-                        <th>完成</th>
-                    </tr>
-                </thead>
-                <tbody>
-        """
+        movements_html = ""
+        for idx, movement in enumerate(train["movements"], 1):
+            sets_html = ""
+            mov_volume = 0
+            mov_max_weight = 0
+            total_reps = 0
+            for s in movement["sets"]:
+                w = _num(s.get("weight"))
+                r = _num(s.get("reps"))
+                mov_volume += w * r
+                mov_max_weight = max(mov_max_weight, w)
+                total_reps += r
 
-        for movement in train["movements"]:
-            for i, set_data in enumerate(movement["sets"], 1):
-                # set_type: 组类型(热=热身,空=正式组等)
-                set_type = set_data.get("set_type", "")
-                if set_type == "热":
-                    type_text = "热身"
-                    type_cls = "badge-warning"
-                elif set_type:
-                    type_text = _esc(set_type)
-                    type_cls = "badge-success"
+                left_w = s.get("left_weight")
+                left_str = f'<span class="extra">左{left_w}</span>' if left_w else ""
+                rest = s.get("rest_seconds")
+                rest_str = f'<span class="rest">休{rest}s</span>' if rest else ""
+                stype = s.get("set_type", "")
+                type_str = f'<span class="type">{stype}</span>' if stype else ""
+                weight_val = s.get("weight")
+                if weight_val in (None, "", 0):
+                    main = "自重"
                 else:
-                    type_text = "正式"
-                    type_cls = "badge-success"
+                    main = f"{weight_val}{s.get('unit','kg')}"
+                reps_val = s.get("reps")
+                reps_str = f"×{reps_val}" if reps_val else ""
+                sets_html += f'<div class="set-tag">{type_str}<span class="main">{main}{reps_str}</span>{left_str}{rest_str}</div>'
 
-                # weight display: 当有左侧重量且与重量不同时注明
-                weight = set_data.get("weight")
-                left_w = set_data.get("left_weight")
-                if weight and left_w and str(left_w) != str(weight):
-                    weight_display = f"{weight} <small style='color:#888;'>(左{left_w})</small>"
-                elif weight:
-                    weight_display = f"{weight}"
-                else:
-                    weight_display = "-"
-                weight_display += f" {set_data.get('unit','kg')}"
+            detail_items = []
+            if mov_volume:
+                detail_items.append(f"容量 <span>{mov_volume:.0f} kg</span>")
+            if mov_max_weight:
+                detail_items.append(f"最大重量 <span>{mov_max_weight:.0f} kg</span>")
+            if not mov_volume and total_reps:
+                detail_items.append(f"总次数 <span>{total_reps} 次</span>")
+            detail_html = " &nbsp;·&nbsp; ".join(detail_items) if detail_items else ""
 
-                # rest seconds
-                rest = set_data.get("rest_seconds")
-                rest_display = f"{rest} 秒" if rest else "-"
+            movements_html += f"""
+            <div class="movement">
+                <div class="movement-num">{idx}</div>
+                <div class="movement-info">
+                    <div class="movement-name">{_esc(movement['name'])}</div>
+                    <div class="sets-row">{sets_html}</div>
+                    <div class="mov-detail">{detail_html}</div>
+                </div>
+            </div>"""
 
-                # reps
-                reps_display = f"{set_data['reps']} 次" if set_data.get("reps") else "-"
+        extra = []
+        if train.get("calories") is not None:
+            extra.append(f"消耗 <span>{train['calories']:.0f} 千卡</span>")
+        if train.get("training_load") is not None:
+            extra.append(f"负荷 <span>{train['training_load']}</span>")
+        extra_html = " &nbsp;·&nbsp; ".join(extra)
 
-                # done status
-                done = set_data.get("done", True)
-                status_text = "完成" if done else "未完成"
-                status_cls = "badge-success" if done else "badge-warning"
+        inner_html += f"""
+        <div class="fold-card open" style="margin-bottom:14px" data-fold="inner">
+            <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                <div class="fold-title">
+                    <span class="text" style="font-size:16px">{_esc(train['title'])}</span>
+                    <span class="badge">{train['duration_minutes']}分钟 · {train_sets}组 · {train_volume:.0f}kg</span>
+                </div>
+                <div class="fold-arrow">▼</div>
+            </div>
+            <div class="fold-body">
+                <div class="detail-row" style="margin-bottom:12px">
+                    开始 <span>{_fmt_ts(train['start_time'])}</span> &nbsp;·&nbsp; 结束 <span>{_fmt_ts(train['end_time'])}</span>
+                </div>
+                <div class="strength-summary">总重量 <span>{train_volume:.0f} kg</span> &nbsp;·&nbsp; {extra_html}</div>
+                {movements_html}
+            </div>
+        </div>"""
 
-                html += f"""
-                    <tr>
-                        <td>{_esc(movement['name'])}</td>
-                        <td>第 {i} 组</td>
-                        <td><span class="badge {type_cls}">{type_text}</span></td>
-                        <td>{weight_display}</td>
-                        <td>{reps_display}</td>
-                        <td>{left_w if left_w else '-'}</td>
-                        <td>{rest_display}</td>
-                        <td><span class="badge {status_cls}">{status_text}</span></td>
-                    </tr>
-                """
-
-        html += """
-                </tbody>
-            </table>
+    return f"""
+    <div class="section fold-card open" data-fold="section">
+        <div class="fold-header" onclick="toggleCard(this.parentElement)">
+            <div class="fold-title">
+                <span class="icon-emoji">💪</span>
+                <span class="text">力量训练</span>
+                <span class="badge">{section_badge}</span>
+            </div>
+            <div class="fold-arrow">▼</div>
         </div>
-        """
-
-    html += "</div>"
-    return html
+        <div class="fold-body">{inner_html}</div>
+    </div>"""
 
 
 def generate_cardio_html(merged_data):
-    """Generate cardio activities HTML"""
     if not merged_data["cardio_activities"]:
         return ""
 
-    html = '<div class="section"><h2>有氧运动</h2>'
-
+    # Group activities by sport category
+    groups = {}
     for activity in merged_data["cardio_activities"]:
-        distance_km = activity["distance_meters"] / 1000
-        duration_min = activity["duration_seconds"] / 60
-        avg_hr = activity.get("avg_hr")
-        hr_display = f"{avg_hr} bpm" if avg_hr else "-"
+        sport_type = activity.get("sport_type")
+        category = SPORT_TYPE_CATEGORIES.get(sport_type, "其他运动")
+        groups.setdefault(category, []).append(activity)
 
-        html += f"""
-        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #333; margin-bottom: 10px;">{_esc(activity['name'])}</h3>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
-                <div>
-                    <p style="color: #999; font-size: 0.9em;">距离</p>
-                    <p style="font-size: 1.5em; font-weight: 700;">{distance_km:.2f} km</p>
+    sections = []
+    for category, activities in groups.items():
+        emoji = {"跑步": "🏃", "骑行": "🚴", "游泳": "🏊", "飞盘": "🥏", "乒乓球": "🏓", "越野跑": "⛰️"}.get(category, "🏃")
+
+        cards = []
+        for activity in activities:
+            distance_km = activity["distance_meters"] / 1000
+            duration_min = activity["duration_seconds"] / 60
+            pace = _pace(duration_min, distance_km)
+            hr = activity.get("avg_hr")
+            hr_str = f"{hr} bpm" if hr else "-"
+
+            cards.append(f"""
+            <div class="card">
+                <div style="font-size:18px;font-weight:700;margin-bottom:8px">{_esc(activity['name'])}</div>
+                <div class="detail-row" style="margin-bottom:12px">
+                    运动类型 <span>{category} ({activity.get('sport_type','')})</span> &nbsp;·&nbsp; 训练负荷 <span>{activity.get('training_load') or 0}</span>
                 </div>
-                <div>
-                    <p style="color: #999; font-size: 0.9em;">时长</p>
-                    <p style="font-size: 1.5em; font-weight: 700;">{duration_min:.0f} 分钟</p>
+                <div class="activity-grid">
+                    <div class="item"><div class="num">{distance_km:.2f}</div><div class="label">距离 km</div></div>
+                    <div class="item"><div class="num">{duration_min:.0f}</div><div class="label">时长 min</div></div>
+                    <div class="item"><div class="num">{pace}</div><div class="label">平均配速 min/km</div></div>
+                    <div class="item"><div class="num">{hr_str}</div><div class="label">平均心率</div></div>
+                    <div class="item"><div class="num">{activity['calories']:.0f}</div><div class="label">消耗 kcal</div></div>
                 </div>
-                <div>
-                    <p style="color: #999; font-size: 0.9em;">平均心率</p>
-                    <p style="font-size: 1.5em; font-weight: 700;">{hr_display}</p>
+            </div>""")
+
+        total_duration = sum(a["duration_seconds"] for a in activities) // 60
+        total_kcal = sum(a["calories"] for a in activities)
+        badge = f"{len(activities)} 场 · {total_duration}分钟 · {total_kcal:.0f}千卡"
+
+        sections.append(f"""
+        <div class="section fold-card open" data-fold="section">
+            <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                <div class="fold-title">
+                    <span class="icon-emoji">{emoji}</span>
+                    <span class="text">{category}</span>
+                    <span class="badge">{badge}</span>
                 </div>
-                <div>
-                    <p style="color: #999; font-size: 0.9em;">消耗热量</p>
-                    <p style="font-size: 1.5em; font-weight: 700;">{activity['calories']:.0f} 千卡</p>
-                </div>
+                <div class="fold-arrow">▼</div>
             </div>
-        </div>
-        """
+            <div class="fold-body">{''.join(cards)}</div>
+        </div>""")
 
-    html += "</div>"
-    return html
+    return "".join(sections)
 
 
 def generate_metrics_html(merged_data):
-    """Generate physiological daily-metrics HTML (HRV / RHR / load / fitness)."""
     m = merged_data.get("daily_metrics") or {}
     if not m:
         return ""
 
-    # (label, value, unit) — skip cards whose value is missing
     cards = [
-        ("HRV(心率变异性)", m.get("avg_sleep_hrv"), "ms"),
-        ("HRV 基线", m.get("baseline"), "ms"),
-        ("静息心率", m.get("rhr"), "bpm"),
-        ("训练负荷", m.get("training_load"), ""),
-        ("负荷比(急/慢)", m.get("training_load_ratio"), ""),
-        ("最大摄氧量", m.get("vo2max"), ""),
-        ("体能水平", m.get("stamina_level"), ""),
+        ("HRV", m.get("avg_sleep_hrv"), "ms", f"基线 {m.get('baseline')}ms" if m.get("baseline") else ""),
+        ("静息心率", m.get("rhr"), "bpm", ""),
+        ("训练负荷", m.get("training_load"), "", f"负荷比 {m.get('training_load_ratio')}" if m.get("training_load_ratio") else ""),
+        ("最大摄氧量", m.get("vo2max"), "", ""),
+        ("体能水平", m.get("stamina_level"), "", f"7日 {m.get('stamina_level_7d')}" if m.get("stamina_level_7d") else ""),
+        ("疲劳度", m.get("tired_rate"), "%", ""),
+        ("有氧能力 ATI", m.get("ati"), "", ""),
+        ("无氧能力 CTI", m.get("cti"), "", ""),
+        ("乳酸阈值心率", m.get("lthr"), "bpm", ""),
+        ("乳酸阈值配速", m.get("ltsp"), "", ""),
+        ("表现指数", m.get("performance"), "", ""),
     ]
 
-    html = '<div class="section"><h2>生理指标</h2><div class="stat-grid">'
-    rendered = 0
-    for label, value, unit in cards:
+    metric_html = ""
+    for label, value, unit, sub in cards:
         if value is None:
             continue
-        unit_html = f'<div>{unit}</div>' if unit else ""
-        html += f"""
-                    <div class="stat-card">
-                        <h3>{label}</h3>
-                        <div class="value">{value}</div>
-                        {unit_html}
-                    </div>"""
-        rendered += 1
+        unit_html = f'<span class="unit">{unit}</span>' if unit else ""
+        sub_html = f'<div class="sub">{sub}</div>' if sub else ""
+        metric_html += f"""
+        <div class="metric-card">
+            <div class="label">{label}</div>
+            <div class="value">{value}{unit_html}</div>
+            {sub_html}
+        </div>"""
 
-    html += "</div></div>"
-    return html if rendered else ""
+    if m.get("interval_list"):
+        metric_html += f"""
+        <div class="metric-card">
+            <div class="label">HRV 区间</div>
+            <div class="value" style="font-size:14px">{'-'.join(str(v) for v in m['interval_list'])}</div>
+        </div>"""
 
-
-def generate_sleep_html(merged_data):
-    """Generate sleep stage breakdown HTML."""
-    s = merged_data.get("sleep_data") or {}
-    if not s:
-        return ""
-
-    total = s.get("total_duration_minutes")
-    phases = s.get("phases") or {}
-
-    def fmt(minutes):
-        if minutes is None:
-            return "-"
-        return f"{minutes // 60} 小时 {minutes % 60} 分" if minutes >= 60 else f"{minutes} 分"
-
-    total_html = fmt(total)
-    stage_defs = [
-        ("深睡", phases.get("deep_minutes")),
-        ("浅睡", phases.get("light_minutes")),
-        ("REM", phases.get("rem_minutes")),
-        ("清醒", phases.get("awake_minutes")),
-    ]
-    stages_html = ""
-    for name, minutes in stage_defs:
-        if minutes is None:
-            continue
-        stages_html += f"""
-                <div>
-                    <p style="color: #999; font-size: 0.9em;">{name}</p>
-                    <p style="font-size: 1.5em; font-weight: 700;">{minutes} 分</p>
-                </div>"""
-
-    avg_hr = s.get("avg_hr")
-    hr_html = ""
-    if avg_hr is not None:
-        hr_html = f'<p style="color: #666; margin-top: 12px;">睡眠平均心率:{avg_hr} bpm</p>'
-
-    return f"""<div class="section"><h2>睡眠</h2>
-        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
-            <h3 style="color: #333; margin-bottom: 15px;">总时长:{total_html}</h3>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">{stages_html}
+    return f"""
+    <div class="section fold-card open" data-fold="section">
+        <div class="fold-header" onclick="toggleCard(this.parentElement)">
+            <div class="fold-title">
+                <span class="icon-emoji">❤️</span>
+                <span class="text">生理指标</span>
+                <span class="badge">{len([c for c in cards if c[1] is not None])} 项数据</span>
             </div>
-            {hr_html}
+            <div class="fold-arrow">▼</div>
+        </div>
+        <div class="fold-body">
+            <div class="metric-grid">{metric_html}</div>
         </div>
     </div>"""
 
 
-def load_analysis(date_str):
-    """Load optional human/LLM-authored analysis for a date.
-
-    Returns the parsed dict from data/daily/{date}.analysis.json, or None if
-    the file is absent. This file is NOT produced by the automated pipeline —
-    it is authored on demand (see project decision: analysis is generated in
-    a Claude session, not by an API call inside this script).
-    """
-    analysis_file = DATA_DIR / f"{date_str}.analysis.json"
-    if not analysis_file.exists():
-        return None
-    try:
-        with open(analysis_file, encoding="utf-8") as f:
-            return json.load(f)
-    except (json.JSONDecodeError, OSError) as e:
-        print(f"[WARN] Analysis file unreadable: {e}")
-        return None
-
-
-def _score_class(value):
-    """Map a 0-10 score to a circle color class."""
-    try:
-        v = float(value)
-    except (TypeError, ValueError):
-        return "score-fair"
-    if v >= 8:
-        return "score-good"
-    if v >= 6:
-        return "score-fair"
-    return "score-poor"
-
-
-def _rating_badge(rating):
-    """Map a rating keyword to a badge class. Accepts good/warn/bad (zh aliases too)."""
-    mapping = {
-        "good": "badge-success", "好": "badge-success", "优": "badge-success",
-        "warn": "badge-warning", "warning": "badge-warning", "中": "badge-warning", "注意": "badge-warning",
-        "bad": "badge-danger", "danger": "badge-danger", "差": "badge-danger", "警告": "badge-danger",
-    }
-    return mapping.get(str(rating).lower(), "badge-success")
-
-
-def generate_analysis_html(merged_data, date_str):
-    """Render the on-demand analysis block from {date}.analysis.json, if present."""
-    a = load_analysis(date_str)
-    if not a:
+def generate_sleep_html(merged_data):
+    s = merged_data.get("sleep_data") or {}
+    if not s:
         return ""
 
-    parts = ['<div class="section"><h2>综合分析</h2>']
+    total = s.get("total_duration_minutes", 0)
+    phases = s.get("phases") or {}
+    deep = phases.get("deep_minutes", 0) or 0
+    light = phases.get("light_minutes", 0) or 0
+    rem = phases.get("rem_minutes", 0) or 0
+    awake = phases.get("awake_minutes", 0) or 0
+    total_phase = deep + light + rem + awake or 1
 
-    # 1. Score circles
-    scores = a.get("scores") or []
-    if a.get("overall_score") is not None:
-        scores = list(scores) + [{"label": "综合评分", "value": a["overall_score"]}]
-    if scores:
-        parts.append('<div class="score-grid">')
-        for s in scores:
-            cls = _score_class(s.get("value"))
-            parts.append(f"""
-                <div style="text-align:center;">
-                    <div class="score-circle {cls}">{s.get('value')}</div>
-                    <p style="color:#333; font-weight:600;">{s.get('label','')}</p>
-                </div>""")
-        parts.append('</div>')
+    deep_pct = deep / total_phase * 100
+    light_pct = light / total_phase * 100
+    rem_pct = rem / total_phase * 100
+    awake_pct = awake / total_phase * 100
 
-    # 2. Core diagnosis
-    if a.get("summary"):
-        parts.append(f"""
-        <div class="alert alert-info">
-            <strong>核心诊断</strong>
-            <p style="margin-top:8px;">{_esc(a['summary'])}</p>
-        </div>""")
+    quality_text = "睡眠正常"
+    if total < 360:
+        quality_text = "睡眠偏短"
+    elif awake_pct > 20:
+        quality_text = "清醒偏多"
 
-    # 3. Dimension tables (recovery / load / strength / sleep)
-    for dim in a.get("dimensions") or []:
-        parts.append(f'<h3 style="color:#333; margin:20px 0 12px;">{_esc(dim.get("title",""))}</h3>')
-        if dim.get("verdict"):
-            parts.append(f'<p style="color:#666; margin-bottom:12px; line-height:1.6;">{_esc(dim["verdict"])}</p>')
-        rows = dim.get("rows") or []
-        if rows:
-            parts.append('<table><thead><tr><th>指标</th><th>数值</th><th>评价</th></tr></thead><tbody>')
-            for r in rows:
-                badge = _rating_badge(r.get("rating", "good"))
-                comment = r.get("comment", "")
-                parts.append(f"""
-                    <tr>
-                        <td>{_esc(r.get('label',''))}</td>
-                        <td>{_esc(r.get('value',''))}</td>
-                        <td><span class="badge {badge}">{_esc(comment)}</span></td>
-                    </tr>""")
-            parts.append('</tbody></table>')
+    avg_hr = s.get("avg_hr")
+    min_hr = s.get("min_hr")
+    max_hr = s.get("max_hr")
+    hr_text = ""
+    if avg_hr is not None:
+        hr_text = f"睡眠心率 {min_hr or '-'}-{max_hr or '-'} bpm，平均 {avg_hr} bpm"
 
-    # 4. Recommendations
-    recs = a.get("recommendations") or []
-    if recs:
-        parts.append('<h3 style="color:#333; margin:25px 0 15px;">建议</h3>')
-        for r in recs:
-            parts.append(f"""
-            <div class="recommendation">
-                <h4>{_esc(r.get('title',''))}</h4>
-                <p>{_esc(r.get('body',''))}</p>
-            </div>""")
+    return f"""
+    <div class="section fold-card open" data-fold="section">
+        <div class="fold-header" onclick="toggleCard(this.parentElement)">
+            <div class="fold-title">
+                <span class="icon-emoji">🌙</span>
+                <span class="text">睡眠</span>
+                <span class="badge">{_fmt_duration(total)}</span>
+            </div>
+            <div class="fold-arrow">▼</div>
+        </div>
+        <div class="fold-body">
+            <div class="sleep-top">
+                <div class="sleep-time">{_fmt_duration(total)}</div>
+                <div class="sleep-quality">{quality_text}</div>
+            </div>
+            <div class="sleep-bar">
+                <span class="deep" style="width:{deep_pct:.1f}%"></span>
+                <span class="light" style="width:{light_pct:.1f}%"></span>
+                <span class="rem" style="width:{rem_pct:.1f}%"></span>
+                <span class="awake" style="width:{awake_pct:.1f}%"></span>
+            </div>
+            <div class="sleep-legend">
+                <div class="legend-item"><div class="legend-dot deep"></div>深睡 {deep}分</div>
+                <div class="legend-item"><div class="legend-dot light"></div>浅睡 {light}分</div>
+                <div class="legend-item"><div class="legend-dot rem"></div>REM {rem}分</div>
+                <div class="legend-item"><div class="legend-dot awake"></div>清醒 {awake}分</div>
+            </div>
+            <div class="sleep-hr">{hr_text}</div>
+        </div>
+    </div>"""
 
-    # 5. Follow-up plan
-    plan = a.get("plan") or []
-    if plan:
-        parts.append('<h3 style="color:#333; margin:25px 0 15px;">后续训练计划</h3>')
-        parts.append('<table><thead><tr><th>日期</th><th>训练内容</th><th>强度</th><th>说明</th></tr></thead><tbody>')
-        for p in plan:
-            parts.append(f"""
-                    <tr>
-                        <td>{_esc(p.get('date',''))}</td>
-                        <td>{_esc(p.get('content',''))}</td>
-                        <td>{_esc(p.get('intensity',''))}</td>
-                        <td>{_esc(p.get('note',''))}</td>
-                    </tr>""")
-        parts.append('</tbody></table>')
 
-    # Attribution
-    model = a.get("model", "Claude")
-    parts.append(f'<p style="color:#999; font-size:0.85em; margin-top:20px;">分析由 {model} 生成 · 仅供参考,不替代专业医疗/教练建议</p>')
+def generate_analysis_html(merged_data):
+    """Generate rule-based analysis for each section."""
+    parts = []
 
-    parts.append('</div>')
-    return "".join(parts)
+    # Strength analysis
+    if merged_data["strength_training"]:
+        for train in merged_data["strength_training"]:
+            if not train["movements"]:
+                continue
+            total_sets = sum(len(m["sets"]) for m in train["movements"])
+            total_volume = sum(
+                _num(s.get("weight")) * _num(s.get("reps"))
+                for m in train["movements"] for s in m["sets"]
+            )
+            mov_count = len(train["movements"])
+            items = [
+                f"今日<span class='highlight'>{_esc(train['title'])}</span>训练共 <span class='highlight'>{mov_count} 个动作 {total_sets} 组</span>，总容量约 <span class='highlight'>{total_volume/1000:.1f} 吨</span>，训练时长 {train['duration_minutes']} 分钟。"
+            ]
+
+            for movement in train["movements"]:
+                weights = [_num(s.get("weight")) for s in movement["sets"] if _num(s.get("weight"))]
+                reps = [_num(s.get("reps")) for s in movement["sets"] if _num(s.get("reps"))]
+                max_w = max(weights) if weights else 0
+                stable = len(set(weights)) == 1 and len(weights) >= 3
+                if stable and max_w:
+                    items.append(f"<span class='highlight'>{_esc(movement['name'])}</span>稳定在 <span class='highlight'>{max_w:.0f}kg</span> 做组，力量维持良好。")
+                elif max_w:
+                    items.append(f"<span class='highlight'>{_esc(movement['name'])}</span>最大重量 <span class='highlight'>{max_w:.0f}kg</span>，可根据状态尝试渐进超负荷。")
+
+            items.append("整体训练强度适中，建议关键动作逐步增加 2.5-5kg 或 1-2 次重复。")
+            parts.append(("力量训练分析", items))
+
+    # Cardio analysis per category
+    groups = {}
+    for activity in merged_data["cardio_activities"]:
+        sport_type = activity.get("sport_type")
+        category = SPORT_TYPE_CATEGORIES.get(sport_type, "其他运动")
+        groups.setdefault(category, []).append(activity)
+
+    for category, activities in groups.items():
+        items = []
+        total_distance = sum(a["distance_meters"] for a in activities) / 1000
+        total_duration = sum(a["duration_seconds"] for a in activities) / 60
+        total_kcal = sum(a["calories"] for a in activities)
+        items.append(f"今日{category}共 <span class='highlight'>{len(activities)} 场</span>，总距离 <span class='highlight'>{total_distance:.2f} km</span>，总时长 <span class='highlight'>{total_duration:.0f} 分钟</span>，消耗 <span class='highlight'>{total_kcal:.0f} 千卡</span>。")
+
+        for a in activities:
+            hr = a.get("avg_hr")
+            duration = a["duration_seconds"] / 60
+            distance = a["distance_meters"] / 1000
+            pace = _pace(duration, distance)
+            if hr:
+                intensity = "低强度" if hr < 120 else "中等强度" if hr < 150 else "高强度"
+                items.append(f"{a['name']} 平均心率 {hr} bpm，属于{intensity}有氧；平均配速 {pace}。")
+        parts.append((f"{category}分析", items))
+
+    # Metrics analysis
+    m = merged_data.get("daily_metrics") or {}
+    if m:
+        items = []
+        hrv = m.get("avg_sleep_hrv")
+        baseline = m.get("baseline")
+        if hrv and baseline:
+            if hrv < baseline * 0.9:
+                items.append(f"HRV 为 <span class='highlight'>{hrv} ms</span>，低于基线 {baseline} ms，提示恢复状态一般。")
+            else:
+                items.append(f"HRV 为 <span class='highlight'>{hrv} ms</span>，接近或高于基线，恢复状态良好。")
+
+        rhr = m.get("rhr")
+        if rhr:
+            items.append(f"静息心率 <span class='highlight'>{rhr} bpm</span>，{'较低，心肺基础较好' if rhr < 55 else '正常范围'}。")
+
+        load = m.get("training_load")
+        ratio = m.get("training_load_ratio")
+        if load and ratio:
+            state = "维持区间" if 0.8 <= ratio <= 1.3 else "负荷偏高" if ratio > 1.3 else "负荷较低"
+            items.append(f"训练负荷 {load}，负荷比 {ratio}，处于<span class='highlight'>{state}</span>。")
+
+        tired = m.get("tired_rate")
+        stamina = m.get("stamina_level")
+        if tired is not None and stamina:
+            items.append(f"疲劳度 {tired}%，体能水平 {stamina}，整体处于可训练状态，需结合睡眠判断恢复质量。")
+        parts.append(("生理指标分析", items))
+
+    # Sleep analysis
+    s = merged_data.get("sleep_data") or {}
+    if s:
+        total = s.get("total_duration_minutes", 0)
+        phases = s.get("phases") or {}
+        deep = phases.get("deep_minutes", 0) or 0
+        awake = phases.get("awake_minutes", 0) or 0
+        total_phase = sum(p for p in phases.values() if p) or 1
+        deep_pct = deep / total_phase * 100
+        awake_pct = awake / total_phase * 100
+        items = []
+        if total < 360:
+            items.append(f"睡眠总时长 <span class='warn'>{_fmt_duration(total)}</span>，明显偏短，可能影响恢复。")
+        else:
+            items.append(f"睡眠总时长 <span class='good'>{_fmt_duration(total)}</span>，时长充足。")
+        items.append(f"深睡占比约 <span class='highlight'>{deep_pct:.0f}%</span>，{'比例正常' if 15 <= deep_pct <= 35 else '需关注'}；清醒占比 {awake_pct:.0f}%。")
+        avg_hr = s.get("avg_hr")
+        if avg_hr:
+            items.append(f"睡眠平均心率 {avg_hr} bpm，夜间心率{'平稳' if 45 <= avg_hr <= 60 else '偏高/偏低，需关注'}。")
+        items.append("建议根据睡眠情况调整今日训练强度，睡眠不足时避免高强度训练。")
+        parts.append(("睡眠分析", items))
+
+    if not parts:
+        return ""
+
+    cards_html = ""
+    for title, items in parts:
+        li_html = "".join(f"<li>{item}</li>" for item in items)
+        cards_html += f"""
+        <div class="analysis-card">
+            <h3>{title}</h3>
+            <ul>{li_html}</ul>
+        </div>"""
+
+    return f"""
+    <div class="section fold-card open" data-fold="section">
+        <div class="fold-header" onclick="toggleCard(this.parentElement)">
+            <div class="fold-title">
+                <span class="icon-emoji">📊</span>
+                <span class="text">数据分析</span>
+                <span class="badge">{len(parts)} 项分析</span>
+            </div>
+            <div class="fold-arrow">▼</div>
+        </div>
+        <div class="fold-body">{cards_html}</div>
+    </div>"""
 
 
 def save_html_report(html_content, date_str):
-    """Save HTML report"""
     PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
-
     html_file = PUBLIC_DIR / f"{date_str}.html"
     with open(html_file, "w", encoding="utf-8") as f:
         f.write(html_content)
-
     print(f"[OK] HTML report generated: {html_file}")
     return html_file
 
 
 def update_summary(date_str):
-    """Update summary.json for index page"""
     summary_file = DATA_DIR / "summary.json"
-
     summary_data = {"dates": []}
 
     if DATA_DIR.exists():
         for json_file in sorted(DATA_DIR.glob("*.json")):
-            # Skip summary.json and the optional {date}.analysis.json sidecars
             if json_file.name == "summary.json" or json_file.name.endswith(".analysis.json"):
                 continue
             date = json_file.stem
@@ -956,47 +929,29 @@ def update_summary(date_str):
 
     with open(summary_file, "w", encoding="utf-8") as f:
         json.dump(summary_data, f, indent=2, ensure_ascii=False)
-
     print(f"[OK] Summary updated: {summary_file}")
 
 
 def main():
-    """Main function"""
     import argparse
-
     parser = argparse.ArgumentParser(description="Generate training analysis report")
     parser.add_argument("--date", type=str, help="Target date (format: YYYY-MM-DD)")
     args = parser.parse_args()
 
-    if args.date:
-        date_str = args.date
-    else:
-        date_str = datetime.now().strftime("%Y-%m-%d")
+    date_str = args.date if args.date else datetime.now().strftime("%Y-%m-%d")
 
     print(f"\n[START] Generating training report for {date_str}...\n")
-
-    # Fetch data
     print("[INFO] Fetching Xunji data...")
     xunji_data = fetch_xunji_data(date_str)
-
     print("[INFO] Fetching Coros data...")
     coros_data = fetch_coros_data(date_str)
-
-    # Merge data
     print("[INFO] Merging data...")
     merged_data = merge_training_data(xunji_data, coros_data, date_str)
-
-    # Save JSON
     save_json_data(merged_data, date_str)
-
-    # Generate HTML
     print("[INFO] Generating HTML report...")
     html_content = generate_html_report(merged_data, date_str)
     save_html_report(html_content, date_str)
-
-    # Update summary
     update_summary(date_str)
-
     print(f"\n[DONE] Report generation completed!\n")
     print(f"JSON: data/daily/{date_str}.json")
     print(f"HTML: public/daily/{date_str}.html")

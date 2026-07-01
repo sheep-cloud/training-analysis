@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>训练分析报告 - 2026-06-30</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0d0d0d;
+            color: #f5f5f7;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header .date { color: #8e8e93; font-size: 14px; margin-bottom: 6px; }
+        .header h1 { font-size: 32px; font-weight: 700; letter-spacing: 1px; }
+        .header .subtitle { color: #00d4aa; font-size: 16px; margin-top: 8px; }
+
+        /* 展开/折叠按钮 */
+        .global-toggle {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .global-toggle button {
+            background: #1c1c1e;
+            color: #00d4aa;
+            border: 1px solid #00d4aa;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 6px;
+        }
+        .global-toggle button:hover { background: #232326; }
+
+        /* 顶部概览 */
+        .overview-card { background: #1c1c1e; border-radius: 20px; padding: 28px; margin-bottom: 24px; }
+        .overview-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .overview-title { font-size: 20px; font-weight: 600; }
+        .ring-wrap { position: relative; width: 110px; height: 110px; }
+        .ring-bg, .ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; }
+        .ring-bg { stroke: #2c2c2e; }
+        .ring-fill { stroke: #00d4aa; stroke-dasharray: 259 345; }
+        .ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+        .ring-text .num { font-size: 26px; font-weight: 700; }
+        .ring-text .label { font-size: 12px; color: #8e8e93; }
+        .overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .overview-item { text-align: center; }
+        .overview-item .value { font-size: 26px; font-weight: 700; color: #fff; }
+        .overview-item .label { font-size: 12px; color: #8e8e93; margin-top: 4px; }
+
+        /* 折叠区块 */
+        .section { margin-bottom: 16px; }
+        .fold-card { background: #1c1c1e; border-radius: 16px; overflow: hidden; }
+        .fold-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 20px; cursor: pointer; user-select: none;
+        }
+        .fold-header:hover { background: #232326; }
+        .fold-title { display: flex; align-items: center; gap: 10px; }
+        .fold-title .icon-emoji { font-size: 22px; }
+        .fold-title .text { font-size: 18px; font-weight: 700; }
+        .fold-title .badge {
+            background: #2c2c2e; color: #8e8e93; font-size: 12px;
+            padding: 3px 10px; border-radius: 12px; margin-left: 8px;
+        }
+        .fold-arrow { font-size: 14px; color: #8e8e93; transition: transform 0.2s; }
+        .fold-card.open .fold-arrow { transform: rotate(180deg); }
+        .fold-body { display: none; padding: 0 20px 20px; }
+        .fold-card.open .fold-body { display: block; }
+
+        /* 卡片通用 */
+        .card { background: #1c1c1e; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .card-title { font-size: 18px; font-weight: 700; color: #fff; }
+        .card-meta { font-size: 13px; color: #8e8e93; }
+        .detail-row { font-size: 12px; color: #8e8e93; margin-top: 6px; display: flex; gap: 16px; flex-wrap: wrap; }
+        .detail-row span { color: #f5f5f7; }
+
+        /* 力量训练 - 训记风格 */
+        .strength-summary { display: flex; gap: 24px; font-size: 13px; color: #8e8e93; margin-bottom: 16px; flex-wrap: wrap; }
+        .strength-summary span { color: #00d4aa; font-weight: 600; }
+        .movement { display: flex; align-items: flex-start; gap: 14px; padding: 16px 0; border-bottom: 1px solid #2c2c2e; }
+        .movement:last-child { border-bottom: none; padding-bottom: 0; }
+        .movement:first-child { padding-top: 0; }
+        .movement-num { width: 36px; height: 36px; border-radius: 50%; background: #2c2c2e; color: #00d4aa; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+        .movement-info { flex: 1; }
+        .movement-name { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+        .sets-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .set-tag { background: #2c2c2e; padding: 8px 12px; border-radius: 10px; font-size: 13px; color: #f5f5f7; }
+        .set-tag .main { font-weight: 600; }
+        .set-tag .type { color: #ff9f0a; font-size: 11px; margin-right: 4px; }
+        .set-tag .rest { color: #8e8e93; font-size: 11px; margin-left: 4px; }
+        .set-tag .extra { color: #8e8e93; font-size: 11px; margin-left: 4px; }
+        .mov-detail { color: #8e8e93; font-size: 12px; margin-top: 8px; }
+        .mov-detail span { color: #f5f5f7; }
+
+        /* 有氧卡片 */
+        .activity-title { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; }
+        .activity-icon { font-size: 22px; }
+        .activity-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 14px; }
+        .activity-grid .item .num { font-size: 22px; font-weight: 700; }
+        .activity-grid .item .label { font-size: 12px; color: #8e8e93; margin-top: 2px; }
+
+        /* 生理指标 */
+        .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+        .metric-card { background: #1c1c1e; border-radius: 16px; padding: 18px; }
+        .metric-card .label { font-size: 12px; color: #8e8e93; margin-bottom: 8px; }
+        .metric-card .value { font-size: 24px; font-weight: 700; }
+        .metric-card .unit { font-size: 12px; color: #8e8e93; margin-left: 2px; }
+        .metric-card .sub { font-size: 11px; color: #8e8e93; margin-top: 6px; }
+
+        /* 睡眠 */
+        .sleep-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .sleep-time { font-size: 32px; font-weight: 700; }
+        .sleep-quality { background: #2c2c2e; padding: 6px 14px; border-radius: 20px; font-size: 14px; color: #00d4aa; }
+        .sleep-bar { height: 14px; border-radius: 7px; background: #2c2c2e; overflow: hidden; display: flex; margin-bottom: 14px; }
+        .sleep-bar span { height: 100%; }
+        .deep { background: #0a84ff; }
+        .light { background: #64d2ff; }
+        .rem { background: #bf5af2; }
+        .awake { background: #ff9f0a; }
+        .sleep-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .sleep-hr { color: #8e8e93; font-size: 13px; margin-top: 16px; }
+
+        /* 数据分析 */
+        .analysis-card { background: #161618; border-radius: 14px; padding: 18px; margin-bottom: 12px; }
+        .analysis-card h3 { font-size: 15px; color: #00d4aa; margin-bottom: 10px; }
+        .analysis-card ul { list-style: none; }
+        .analysis-card li { padding: 5px 0; font-size: 13px; line-height: 1.6; color: #d1d1d6; border-bottom: 1px solid #2c2c2e; }
+        .analysis-card li:last-child { border-bottom: none; }
+        .analysis-card .highlight { color: #fff; font-weight: 600; }
+        .analysis-card .warn { color: #ff9f0a; }
+        .analysis-card .good { color: #00d4aa; }
+
+        /* 参考图 */
+        .refs { margin-top: 40px; padding-top: 30px; border-top: 1px solid #2c2c2e; }
+        .refs h3 { font-size: 16px; margin-bottom: 16px; color: #8e8e93; }
+        .ref-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .ref-grid img { width: 100%; border-radius: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="date">2026-06-30 周三</div>
+            <h1>训练分析报告</h1>
+            <div class="subtitle">今天有 3 练</div>
+        </div>
+
+        <div class="global-toggle">
+            <button onclick="toggleAll(true)">全部展开</button>
+            <button onclick="toggleAll(false)">全部折叠</button>
+        </div>
+
+        <!-- 顶部概览 -->
+        <div class="overview-card">
+            <div class="overview-top">
+                <div>
+                    <div class="overview-title">今日训练负荷</div>
+                    <div class="card-meta" style="margin-top:8px">力量 + 有氧综合</div>
+                </div>
+                <div class="ring-wrap">
+                    <svg width="110" height="110" viewBox="0 0 120 120">
+                        <circle class="ring-bg" cx="60" cy="60" r="50" transform="rotate(135 60 60)"></circle>
+                        <circle class="ring-fill" cx="60" cy="60" r="50" transform="rotate(135 60 60)"></circle>
+                    </svg>
+                    <div class="ring-text">
+                        <div class="num">166</div>
+                        <div class="label">负荷</div>
+                    </div>
+                </div>
+            </div>
+            <div class="overview-grid">
+                <div class="overview-item"><div class="value">3</div><div class="label">训练场次</div></div>
+                <div class="overview-item"><div class="value">155</div><div class="label">有氧时长(分钟)</div></div>
+                <div class="overview-item"><div class="value">1329</div><div class="label">消耗热量(千卡)</div></div>
+                <div class="overview-item"><div class="value">9</div><div class="label">力量负荷</div></div>
+            </div>
+        </div>
+
+        <!-- 力量训练 -->
+        <div class="section fold-card open" data-fold="section">
+            <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                <div class="fold-title">
+                    <span class="icon-emoji">💪</span>
+                    <span class="text">力量训练</span>
+                    <span class="badge">背部 · 58分钟 · 5动作</span>
+                </div>
+                <div class="fold-arrow">▼</div>
+            </div>
+            <div class="fold-body">
+                <div class="fold-card open" style="margin-bottom:14px" data-fold="inner">
+                    <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                        <div class="fold-title">
+                            <span class="text" style="font-size:16px">背部</span>
+                            <span class="badge">23组 · 10.1吨</span>
+                        </div>
+                        <div class="fold-arrow">▼</div>
+                    </div>
+                    <div class="fold-body">
+                        <div class="detail-row" style="margin-bottom:12px">
+                            开始 <span>10:45</span> &nbsp;·&nbsp; 结束 <span>11:43</span>
+                        </div>
+                        <div class="strength-summary">
+                            总重量 <span>16586 kg</span> &nbsp;·&nbsp; 消耗 <span>269 千卡</span> &nbsp;·&nbsp; 负荷 <span>9</span>
+                        </div>
+                        <div class="movement">
+                            <div class="movement-num">1</div>
+                            <div class="movement-info">
+                                <div class="movement-name">哑铃划船（手扶）</div>
+                                <div class="sets-row">
+                                    <div class="set-tag"><span class="type">热</span><span class="main">20kg×15</span><span class="extra">左60</span><span class="rest">休75s</span></div>
+                                    <div class="set-tag"><span class="type">热</span><span class="main">30kg×12</span><span class="extra">左60</span><span class="rest">休75s</span></div>
+                                    <div class="set-tag"><span class="type">热</span><span class="main">40kg×10</span><span class="extra">左60</span><span class="rest">休75s</span></div>
+                                    <div class="set-tag"><span class="main">50kg×10</span><span class="extra">左50</span><span class="rest">休75s</span></div>
+                                    <div class="set-tag"><span class="main">50kg×10</span><span class="extra">左50</span><span class="rest">休75s</span></div>
+                                    <div class="set-tag"><span class="main">50kg×10</span><span class="extra">左50</span><span class="rest">休75s</span></div>
+                                    <div class="set-tag"><span class="main">50kg×10</span><span class="extra">左50</span><span class="rest">休75s</span></div>
+                                </div>
+                                <div class="mov-detail">容量 <span>1310 kg</span> &nbsp;·&nbsp; 最大重量 <span>50 kg</span></div>
+                            </div>
+                        </div>
+                        <div class="movement">
+                            <div class="movement-num">2</div>
+                            <div class="movement-info">
+                                <div class="movement-name">对握高位下拉</div>
+                                <div class="sets-row">
+                                    <div class="set-tag"><span class="main">59kg×12</span><span class="rest">休60s</span></div>
+                                    <div class="set-tag"><span class="main">59kg×12</span><span class="rest">休60s</span></div>
+                                    <div class="set-tag"><span class="main">59kg×12</span><span class="rest">休60s</span></div>
+                                    <div class="set-tag"><span class="main">59kg×12</span><span class="rest">休60s</span></div>
+                                </div>
+                                <div class="mov-detail">容量 <span>2832 kg</span> &nbsp;·&nbsp; 最大重量 <span>59 kg</span></div>
+                            </div>
+                        </div>
+                        <div class="movement">
+                            <div class="movement-num">3</div>
+                            <div class="movement-info">
+                                <div class="movement-name">窄握把手下拉</div>
+                                <div class="sets-row">
+                                    <div class="set-tag"><span class="main">63.5kg×12</span><span class="rest">休60s</span></div>
+                                    <div class="set-tag"><span class="main">63.5kg×12</span><span class="rest">休60s</span></div>
+                                    <div class="set-tag"><span class="main">68kg×12</span><span class="rest">休60s</span></div>
+                                    <div class="set-tag"><span class="main">68kg×12</span><span class="rest">休60s</span></div>
+                                </div>
+                                <div class="mov-detail">容量 <span>3156 kg</span> &nbsp;·&nbsp; 最大重量 <span>68 kg</span></div>
+                            </div>
+                        </div>
+                        <div class="movement">
+                            <div class="movement-num">4</div>
+                            <div class="movement-info">
+                                <div class="movement-name">器械划船2</div>
+                                <div class="sets-row">
+                                    <div class="set-tag"><span class="main">63.5kg×12</span><span class="rest">休60s</span></div>
+                                    <div class="set-tag"><span class="main">59kg×12</span><span class="rest">休60s</span></div>
+                                    <div class="set-tag"><span class="main">59kg×12</span><span class="rest">休60s</span></div>
+                                    <div class="set-tag"><span class="main">59kg×12</span><span class="rest">休60s</span></div>
+                                </div>
+                                <div class="mov-detail">容量 <span>2832 kg</span> &nbsp;·&nbsp; 最大重量 <span>63.5 kg</span></div>
+                            </div>
+                        </div>
+                        <div class="movement">
+                            <div class="movement-num">5</div>
+                            <div class="movement-info">
+                                <div class="movement-name">引体向上(负重)</div>
+                                <div class="sets-row">
+                                    <div class="set-tag"><span class="main">自重×15</span></div>
+                                    <div class="set-tag"><span class="main">自重×15</span></div>
+                                    <div class="set-tag"><span class="main">自重×15</span></div>
+                                    <div class="set-tag"><span class="main">自重×15</span></div>
+                                </div>
+                                <div class="mov-detail">总次数 <span>60 次</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 飞盘 -->
+        <div class="section fold-card open" data-fold="section">
+            <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                <div class="fold-title">
+                    <span class="icon-emoji">🥏</span>
+                    <span class="text">飞盘</span>
+                    <span class="badge">110分钟 · 670千卡</span>
+                </div>
+                <div class="fold-arrow">▼</div>
+            </div>
+            <div class="fold-body">
+                <div class="detail-row" style="margin-bottom:12px">运动类型 <span>飞盘 (1100)</span> &nbsp;·&nbsp; 训练负荷 <span>78</span></div>
+                <div class="activity-grid">
+                    <div class="item"><div class="num">3.56</div><div class="label">距离 km</div></div>
+                    <div class="item"><div class="num">110</div><div class="label">时长 min</div></div>
+                    <div class="item"><div class="num">5:16</div><div class="label">平均配速 min/km</div></div>
+                    <div class="item"><div class="num">114</div><div class="label">平均心率 bpm</div></div>
+                    <div class="item"><div class="num">670</div><div class="label">消耗 kcal</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 跑步 -->
+        <div class="section fold-card open" data-fold="section">
+            <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                <div class="fold-title">
+                    <span class="icon-emoji">🏃</span>
+                    <span class="text">跑步</span>
+                    <span class="badge">46分钟 · 390千卡</span>
+                </div>
+                <div class="fold-arrow">▼</div>
+            </div>
+            <div class="fold-body">
+                <div class="detail-row" style="margin-bottom:12px">运动类型 <span>跑步 (101)</span> &nbsp;·&nbsp; 训练负荷 <span>79</span></div>
+                <div class="activity-grid">
+                    <div class="item"><div class="num">8.46</div><div class="label">距离 km</div></div>
+                    <div class="item"><div class="num">46</div><div class="label">时长 min</div></div>
+                    <div class="item"><div class="num">5:26</div><div class="label">平均配速 min/km</div></div>
+                    <div class="item"><div class="num">139</div><div class="label">平均心率 bpm</div></div>
+                    <div class="item"><div class="num">390</div><div class="label">消耗 kcal</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 生理指标 -->
+        <div class="section fold-card open" data-fold="section">
+            <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                <div class="fold-title">
+                    <span class="icon-emoji">❤️</span>
+                    <span class="text">生理指标</span>
+                    <span class="badge">12 项数据</span>
+                </div>
+                <div class="fold-arrow">▼</div>
+            </div>
+            <div class="fold-body">
+                <div class="metric-grid">
+                    <div class="metric-card"><div class="label">HRV</div><div class="value">59<span class="unit">ms</span></div><div class="sub">基线 67ms</div></div>
+                    <div class="metric-card"><div class="label">静息心率</div><div class="value">49<span class="unit">bpm</span></div></div>
+                    <div class="metric-card"><div class="label">训练负荷</div><div class="value">166</div><div class="sub">负荷比 1.08</div></div>
+                    <div class="metric-card"><div class="label">最大摄氧量</div><div class="value">56</div></div>
+                    <div class="metric-card"><div class="label">体能水平</div><div class="value">86.7</div><div class="sub">7日 101.0</div></div>
+                    <div class="metric-card"><div class="label">疲劳度</div><div class="value">9<span class="unit">%</span></div></div>
+                    <div class="metric-card"><div class="label">有氧能力 ATI</div><div class="value">113</div></div>
+                    <div class="metric-card"><div class="label">无氧能力 CTI</div><div class="value">104</div></div>
+                    <div class="metric-card"><div class="label">乳酸阈值心率</div><div class="value">167<span class="unit">bpm</span></div></div>
+                    <div class="metric-card"><div class="label">乳酸阈值配速</div><div class="value">262</div></div>
+                    <div class="metric-card"><div class="label">表现指数</div><div class="value">2</div></div>
+                    <div class="metric-card"><div class="label">HRV 区间</div><div class="value" style="font-size:14px">5-47-57-77</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 睡眠 -->
+        <div class="section fold-card open" data-fold="section">
+            <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                <div class="fold-title">
+                    <span class="icon-emoji">🌙</span>
+                    <span class="text">睡眠</span>
+                    <span class="badge">4小时35分</span>
+                </div>
+                <div class="fold-arrow">▼</div>
+            </div>
+            <div class="fold-body">
+                <div class="sleep-top">
+                    <div class="sleep-time">4 小时 35 分</div>
+                    <div class="sleep-quality">睡眠偏短</div>
+                </div>
+                <div class="sleep-bar">
+                    <span class="deep" style="width:28%"></span>
+                    <span class="light" style="width:53%"></span>
+                    <span class="rem" style="width:10%"></span>
+                    <span class="awake" style="width:9%"></span>
+                </div>
+                <div class="sleep-legend">
+                    <div class="legend-item"><div class="legend-dot deep"></div>深睡 78分</div>
+                    <div class="legend-item"><div class="legend-dot light"></div>浅睡 145分</div>
+                    <div class="legend-item"><div class="legend-dot rem"></div>REM 52分</div>
+                    <div class="legend-item"><div class="legend-dot awake"></div>清醒 56分</div>
+                </div>
+                <div class="sleep-hr">睡眠心率 47-63 bpm，平均 51 bpm</div>
+            </div>
+        </div>
+
+        <!-- 数据分析 -->
+        <div class="section fold-card open" data-fold="section">
+            <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                <div class="fold-title">
+                    <span class="icon-emoji">📊</span>
+                    <span class="text">数据分析</span>
+                    <span class="badge">5 项分析</span>
+                </div>
+                <div class="fold-arrow">▼</div>
+            </div>
+            <div class="fold-body">
+                <div class="analysis-card">
+                    <h3>力量训练分析</h3>
+                    <ul>
+                        <li>今日背部训练共 <span class="highlight">5 个动作 23 组</span>，总容量约 <span class="highlight">10.1 吨</span>，训练时长 58 分钟。</li>
+                        <li>哑铃划船热身充分，正式组稳定在 <span class="highlight">50kg×10×4</span>，左侧重量 50kg 与右侧一致，左右平衡良好。</li>
+                        <li>引体向上采用自重完成 4 组×15 次，背部肌耐力表现较好。</li>
+                        <li>整体训练强度适中，建议下次尝试在关键动作上增加 2.5-5kg 重量或增加 1-2 次重复。</li>
+                    </ul>
+                </div>
+                <div class="analysis-card">
+                    <h3>飞盘分析</h3>
+                    <ul>
+                        <li>飞盘活动时长 110 分钟，距离 3.56 km，平均心率 114 bpm，属于中等强度有氧。</li>
+                        <li>消耗 670 千卡，训练负荷 78，对当日总热量贡献较大。</li>
+                    </ul>
+                </div>
+                <div class="analysis-card">
+                    <h3>跑步分析</h3>
+                    <ul>
+                        <li>速度间歇 8.46 km，平均配速 <span class="highlight">5:26</span>，平均心率 139 bpm，强度控制合理。</li>
+                        <li>训练负荷 79，适合维持或提升有氧能力。</li>
+                    </ul>
+                </div>
+                <div class="analysis-card">
+                    <h3>生理指标分析</h3>
+                    <ul>
+                        <li>HRV 为 <span class="highlight">59 ms</span>，略低于基线 67 ms，提示恢复状态一般。</li>
+                        <li>静息心率 <span class="highlight">49 bpm</span>，处于较低水平，心肺基础较好。</li>
+                        <li>训练负荷 166，负荷比 1.08，处于维持区间，近期负荷相对稳定。</li>
+                        <li>疲劳度 9%，体能水平 86.7，整体处于可训练状态，但需关注睡眠质量。</li>
+                    </ul>
+                </div>
+                <div class="analysis-card">
+                    <h3>睡眠分析</h3>
+                    <ul>
+                        <li>睡眠总时长 <span class="warn">4 小时 35 分</span>，明显偏短，可能影响恢复。</li>
+                        <li>深睡占比约 28%，比例正常；清醒时间 56 分钟，偏多。</li>
+                        <li>睡眠平均心率 51 bpm，心率范围 47-63 bpm，夜间心率平稳。</li>
+                        <li>建议今晚提前入睡，保证 7 小时以上睡眠，以促进训练恢复。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 参考图 -->
+        <div class="refs">
+            <h3>UI 参考</h3>
+            <div class="ref-grid">
+                <img src="ui-ref/xunji.jpg" alt="训记">
+                <img src="ui-ref/coros-overview.jpg" alt="高驰概览">
+                <img src="ui-ref/coros-sleep.jpg" alt="高驰睡眠">
+                <img src="ui-ref/coros-run.jpg" alt="高驰跑步">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCard(card) {
+            card.classList.toggle('open');
+        }
+        function toggleAll(open) {
+            document.querySelectorAll('[data-fold="section"]').forEach(c => {
+                if (open) c.classList.add('open');
+                else c.classList.remove('open');
+            });
+        }
+    </script>
+</body>
+</html>
