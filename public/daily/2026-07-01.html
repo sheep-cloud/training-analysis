@@ -115,6 +115,29 @@ body {
 .analysis-card .warn { color: #ff9f0a; }
 .analysis-card .good { color: #00d4aa; }
 
+.score-card { display: flex; align-items: center; justify-content: space-between; background: #1c1c1e; border-radius: 20px; padding: 28px; margin-bottom: 24px; }
+.score-left { flex: 1; }
+.score-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.score-desc { color: #8e8e93; font-size: 13px; }
+.score-right { text-align: right; }
+.score-value { font-size: 48px; font-weight: 700; line-height: 1; }
+.score-value.good { color: #00d4aa; }
+.score-value.warn { color: #ff9f0a; }
+.score-value.danger { color: #ff453a; }
+.score-value.neutral { color: #0a84ff; }
+.readiness-badge { display: inline-block; margin-top: 10px; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+.readiness-badge.good { background: rgba(0, 212, 170, 0.15); color: #00d4aa; }
+.readiness-badge.warn { background: rgba(255, 159, 10, 0.15); color: #ff9f0a; }
+.readiness-badge.danger { background: rgba(255, 69, 58, 0.15); color: #ff453a; }
+.readiness-badge.neutral { background: rgba(10, 132, 255, 0.15); color: #0a84ff; }
+.metric-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+.metric-row .metric { background: #2c2c2e; padding: 8px 12px; border-radius: 10px; font-size: 13px; }
+.metric-row .metric .label { color: #8e8e93; margin-right: 6px; }
+.metric-row .metric .value { color: #f5f5f7; font-weight: 600; }
+.trend-up { color: #00d4aa; }
+.trend-down { color: #ff453a; }
+.trend-flat { color: #8e8e93; }
+
 .footer { text-align: center; color: #8e8e93; font-size: 12px; margin-top: 40px; }
 </style>
 </head>
@@ -150,7 +173,7 @@ body {
             </div>
             <div class="overview-grid">
                 <div class="overview-item"><div class="value">1</div><div class="label">训练场次</div></div>
-                <div class="overview-item"><div class="value">34</div><div class="label">有氧时长(分钟)</div></div>
+                <div class="overview-item"><div class="value">00:34:00</div><div class="label">训练时长</div></div>
                 <div class="overview-item"><div class="value">440</div><div class="label">消耗热量(千卡)</div></div>
                 <div class="overview-item"><div class="value">0</div><div class="label">力量负荷</div></div>
             </div>
@@ -158,12 +181,24 @@ body {
 
         
         
+    <div class="score-card">
+        <div class="score-left">
+            <div class="score-title">恢复评分</div>
+            <div class="score-desc">基于 HRV、静息心率、睡眠、疲劳度与负荷比综合计算</div>
+            <div class="metric-row"><div class="metric"><span class="label">HRV:</span><span class="value">62.0/67.0</span></div><div class="metric"><span class="label">RHR:</span><span class="value">51 bpm</span></div><div class="metric"><span class="label">睡眠:</span><span class="value">5 小时 56 分</span></div><div class="metric"><span class="label">疲劳:</span><span class="value">3.0%</span></div></div>
+        </div>
+        <div class="score-right">
+            <div class="score-value good">85</div>
+            <div class="readiness-badge good">适宜高强度</div>
+        </div>
+    </div>
+        
         <div class="section fold-card open" data-fold="section">
             <div class="fold-header" onclick="toggleCard(this.parentElement)">
                 <div class="fold-title">
                     <span class="icon-emoji">🏃</span>
                     <span class="text">跑步</span>
-                    <span class="badge">1 场 · 34分钟 · 440千卡</span>
+                    <span class="badge">1 场 · 00:34:00 · 440千卡</span>
                 </div>
                 <div class="fold-arrow">▼</div>
             </div>
@@ -175,7 +210,7 @@ body {
                 </div>
                 <div class="activity-grid">
                     <div class="item"><div class="num">6.43</div><div class="label">距离 km</div></div>
-                    <div class="item"><div class="num">35</div><div class="label">时长 min</div></div>
+                    <div class="item"><div class="num">00:34:00</div><div class="label">时长</div></div>
                     <div class="item"><div class="num">5:24</div><div class="label">平均配速 min/km</div></div>
                     <div class="item"><div class="num">144 bpm</div><div class="label">平均心率</div></div>
                     <div class="item"><div class="num">440</div><div class="label">消耗 kcal</div></div>
@@ -291,27 +326,35 @@ body {
             <div class="fold-title">
                 <span class="icon-emoji">📊</span>
                 <span class="text">数据分析</span>
-                <span class="badge">3 项分析</span>
+                <span class="badge">5 项分析</span>
             </div>
             <div class="fold-arrow">▼</div>
         </div>
         <div class="fold-body">
         <div class="analysis-card">
+            <h3>恢复状态</h3>
+            <ul><li>综合恢复评分 <span class='highlight'>85</span>，今日训练建议：<span class='good'>适宜高强度</span>。</li></ul>
+        </div>
+        <div class="analysis-card">
             <h3>跑步分析</h3>
-            <ul><li>今日跑步共 <span class='highlight'>1 场</span>，总距离 <span class='highlight'>6.43 km</span>，总时长 <span class='highlight'>35 分钟</span>，消耗 <span class='highlight'>440 千卡</span>。</li><li>轻松跑 平均心率 144 bpm，属于中等强度有氧；平均配速 5:24。</li></ul>
+            <ul><li>今日跑步共 <span class='highlight'>1 场</span>，总距离 <span class='highlight'>6.43 km</span>，总时长 <span class='highlight'>00:34:00</span>，消耗 <span class='highlight'>440 千卡</span>。</li><li>跑步总时长较 14 日同类型日均 42 分钟 <span class='trend-down'>↓18%</span>。</li><li>轻松跑 平均心率 144 bpm，处于有氧进阶区（M区）；平均配速 5:24。</li><li>配速与近期同类型平均相当，状态稳定。</li></ul>
         </div>
         <div class="analysis-card">
             <h3>生理指标分析</h3>
-            <ul><li>HRV 为 <span class='highlight'>62.0 ms</span>，接近或高于基线，恢复状态良好。</li><li>静息心率 <span class='highlight'>51 bpm</span>，较低，心肺基础较好。</li><li>训练负荷 67，负荷比 1.02，处于<span class='highlight'>维持区间</span>。</li><li>疲劳度 3.0%，体能水平 86.7，整体处于可训练状态，需结合睡眠判断恢复质量。</li></ul>
+            <ul><li>HRV 为 <span class='highlight'>62.0 ms</span>，接近或高于基线，恢复状态良好。<span class='trend-flat'>↓5%</span></li><li>静息心率 <span class='highlight'>51 bpm</span>，较低，心肺基础较好。<span class='trend-down'>↑7%</span></li><li>训练负荷 67，负荷比 1.02，处于<span class='highlight'>维持区间</span>。</li><li>疲劳度 3.0%，体能水平 86.7，整体处于可训练状态，需结合睡眠判断恢复质量。</li><li>最大摄氧量 <span class='highlight'>56</span>，可作为有氧能力长期跟踪指标。</li><li>有氧能力 ATI 107.0，无氧能力 CTI 104.0。</li></ul>
         </div>
         <div class="analysis-card">
             <h3>睡眠分析</h3>
-            <ul><li>睡眠总时长 <span class='warn'>5 小时 56 分</span>，明显偏短，可能影响恢复。</li><li>深睡占比约 <span class='highlight'>14%</span>，需关注；清醒占比 6%。</li><li>睡眠平均心率 53 bpm，夜间心率平稳。</li><li>建议根据睡眠情况调整今日训练强度，睡眠不足时避免高强度训练。</li></ul>
+            <ul><li>睡眠总时长 <span class='warn'>5 小时 56 分</span>，明显偏短，可能影响恢复。</li><li>睡眠时长较 14 日均值 334 分钟 <span class='trend-up'>↑7%</span>，注意调整作息。</li><li>深睡占比约 <span class='highlight'>19%</span>，比例正常；清醒占比 8%。</li><li>含零星小睡 <span class='highlight'>132 分钟</span>。</li><li>睡眠平均心率 53 bpm，夜间心率平稳。</li><li>建议根据睡眠情况调整今日训练强度，睡眠不足时避免高强度训练。</li></ul>
+        </div>
+        <div class="analysis-card">
+            <h3>恢复建议</h3>
+            <ul><li>今日综合负荷 67，较 14 日均值 81 <span class='trend-down'>↓18%</span>。</li><li>睡眠不足，明天如训练建议选择低强度有氧或技术练习，避免大重量力量训练。</li></ul>
         </div></div>
     </div>
 
         <div class="footer">
-            <p>数据来源: 训记 App + 高驰 App · 生成时间: 2026-07-01 23:18:58</p>
+            <p>数据来源: 训记 App + 高驰 App · 生成时间: 2026-07-02 00:25:16</p>
         </div>
     </div>
     <script>
