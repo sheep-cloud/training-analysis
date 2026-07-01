@@ -11,7 +11,7 @@ import os
 import sys
 import sqlite3
 import subprocess
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 # Force UTF-8 encoding on Windows
@@ -23,6 +23,20 @@ if sys.platform.startswith('win'):
 PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "data" / "daily"
 PUBLIC_DIR = PROJECT_ROOT / "public" / "daily"
+
+# Allow importing coros_mcp from its isolated venv so we can reuse its
+# authentication + sync logic instead of shelling out to the CLI.
+COROS_MCP_VENV = Path("C:/Develop/Workspaces/AIProjects/cygnusb/coros-mcp/.venv/Lib/site-packages")
+COROS_MCP_SRC = Path("C:/Develop/Workspaces/AIProjects/cygnusb/coros-mcp")
+for p in (COROS_MCP_VENV, COROS_MCP_SRC):
+    if p.exists():
+        sys.path.insert(0, str(p))
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv(PROJECT_ROOT / ".env")
+except Exception:
+    pass
 
 # Coros MCP local SQLite cache (filled by `coros-mcp sync`)
 COROS_CACHE_DB = Path.home() / ".config" / "coros-mcp" / "cache.db"
@@ -46,6 +60,34 @@ SPORT_TYPE_CATEGORIES = {
     404: "骑行",
     1100: "飞盘",
 }
+
+
+def ensure_coros_sync(date_str):
+    """Auto-login (if needed) and sync Coros data for date_str into the local cache."""
+    try:
+        import asyncio
+        from coros_mcp.coros_api import get_stored_auth, login, get_env_credentials
+        from coros_mcp.cache.sync import sync_all
+
+        auth = get_stored_auth()
+        if auth is None:
+            creds = get_env_credentials()
+            if creds is None:
+                print("[WARN] Coros not authenticated and no credentials in .env")
+                return
+            email, password, region = creds
+            auth = asyncio.run(login(email, password, region, skip_mobile=False))
+
+        day = date_str.replace("-", "")
+        # Sync previous day as well; late-night activities may be stored under the previous date.
+        prev_day = (datetime.strptime(date_str, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y%m%d")
+
+        stats = asyncio.run(sync_all(auth, prev_day, end_day=day))
+        print(f"[INFO] Coros synced: daily={stats['daily']}, sleep={stats['sleep']}, activities={stats['activities']}")
+        for e in stats.get("errors", []):
+            print(f"[WARN] Coros sync error: {e}")
+    except Exception as e:
+        print(f"[WARN] Coros sync failed: {e}")
 
 
 def _num(value, default=0):
@@ -122,7 +164,8 @@ def fetch_xunji_data(date_str):
 
 
 def fetch_coros_data(date_str):
-    """Read coros-mcp local SQLite cache."""
+    """Read coros-mcp local SQLite cache. Syncs first to refresh token and pick up same-day data."""
+    ensure_coros_sync(date_str)
     empty = {"activities": [], "daily_metrics": {}, "sleep_data": {}}
 
     if not COROS_CACHE_DB.exists():

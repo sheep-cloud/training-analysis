@@ -1,7 +1,17 @@
 {
   "date": "2026-07-01",
   "strength_training": [],
-  "cardio_activities": [],
+  "cardio_activities": [
+    {
+      "name": "轻松跑",
+      "sport_type": 100,
+      "duration_seconds": 2085,
+      "distance_meters": 6427.09,
+      "avg_hr": 144,
+      "calories": 439.7,
+      "training_load": 67
+    }
+  ],
   "daily_metrics": {
     "date": "20260701",
     "avg_sleep_hrv": 62.0,
@@ -13,19 +23,19 @@
       77
     ],
     "rhr": 51,
-    "training_load": 0,
-    "training_load_ratio": 0.95,
-    "tired_rate": -5.0,
-    "ati": 97.0,
-    "cti": 102.0,
-    "performance": -1,
+    "training_load": 67,
+    "training_load_ratio": 1.02,
+    "tired_rate": 3.0,
+    "ati": 107.0,
+    "cti": 104.0,
+    "performance": 1,
     "distance": 0.0,
     "duration": 0,
-    "vo2max": null,
-    "lthr": null,
-    "ltsp": null,
-    "stamina_level": null,
-    "stamina_level_7d": null
+    "vo2max": 56,
+    "lthr": 167,
+    "ltsp": 262,
+    "stamina_level": 86.7,
+    "stamina_level_7d": 98.0
   },
   "sleep_data": {
     "date": "20260701",
@@ -43,9 +53,9 @@
     "quality_score": null
   },
   "summary": {
-    "total_load": 0,
-    "total_calories": 0,
-    "total_duration": 0,
-    "workout_count": 0
+    "total_load": 67,
+    "total_calories": 439.7,
+    "total_duration": 34,
+    "workout_count": 1
   }
 }

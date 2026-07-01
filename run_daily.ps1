@@ -9,23 +9,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# coros-mcp 可执行文件(与 .mcp.json 一致);如已在 PATH 可改为 "coros-mcp"
-$CorosMcp = "C:/Develop/Workspaces/AIProjects/cygnusb/coros-mcp/.venv/Scripts/coros-mcp.exe"
-
 Write-Host "🚀 开始生成 $Date 的训练报告..." -ForegroundColor Green
 Write-Host ""
 
-# 1. 同步高驰数据到本地缓存(失败不中断,容忍离线/已同步)
-$DayCompact = $Date -replace "-", ""
-Write-Host "🔄 正在同步高驰数据 ($DayCompact)..." -ForegroundColor Cyan
-try {
-    & $CorosMcp sync --from $DayCompact --to $DayCompact
-} catch {
-    Write-Host "⚠️  高驰同步失败,使用现有缓存继续: $_" -ForegroundColor Yellow
-}
-
-# 2. 运行 Python 脚本
-Write-Host ""
+# 1. 运行 Python 脚本（脚本内部会自动同步高驰数据并刷新 token）
 Write-Host "⏳ 正在运行脚本..." -ForegroundColor Cyan
 py scripts/generate_report.py --date $Date
 

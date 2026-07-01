@@ -9,20 +9,12 @@ set -e
 cd "$(dirname "$0")"
 
 DATE=${1:-$(date +%Y-%m-%d)}
-DAY_COMPACT=${DATE//-/}
-
-# coros-mcp 可执行文件;如已在 PATH 可直接用 "coros-mcp"
-COROS_MCP=${COROS_MCP:-/c/Develop/Workspaces/AIProjects/cygnusb/coros-mcp/.venv/Scripts/coros-mcp.exe}
 
 echo "🚀 开始生成 $DATE 的训练报告..."
 echo ""
 
-# 1. 同步高驰数据到本地缓存(失败不中断,容忍离线/已同步)
-echo "🔄 正在同步高驰数据 ($DAY_COMPACT)..."
-PYTHONUTF8=1 "$COROS_MCP" sync --from "$DAY_COMPACT" --to "$DAY_COMPACT" || echo "⚠️  高驰同步失败,使用现有缓存继续"
-
-# 2. 运行 Python 脚本
-echo ""
+# 1. 运行 Python 脚本（脚本内部会自动同步高驰数据并刷新 token）
+echo "⏳ 正在运行脚本..."
 py scripts/generate_report.py --date "$DATE"
 
 # 3. 提交到 GitHub
