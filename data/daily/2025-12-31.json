@@ -1,0 +1,740 @@
+{
+  "date": "2025-12-31",
+  "strength_training": [
+    {
+      "title": "臀腿",
+      "start_time": 1767138593028,
+      "end_time": 1767138594970,
+      "duration_minutes": 0,
+      "calories": null,
+      "training_load": null,
+      "movements": [
+        {
+          "name": "史密斯机深蹲",
+          "sets": [
+            {
+              "done": false,
+              "weight": "20",
+              "unit": "kg",
+              "reps": "15",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "热",
+              "rest_seconds": 120,
+              "left_weight": "80"
+            },
+            {
+              "done": false,
+              "weight": "50",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "热",
+              "rest_seconds": 120,
+              "left_weight": "80"
+            },
+            {
+              "done": false,
+              "weight": "80",
+              "unit": "kg",
+              "reps": "10",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "热",
+              "rest_seconds": 120,
+              "left_weight": "80"
+            },
+            {
+              "done": false,
+              "weight": "100",
+              "unit": "kg",
+              "reps": "8",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 120,
+              "left_weight": "100"
+            },
+            {
+              "done": false,
+              "weight": "100",
+              "unit": "kg",
+              "reps": "8",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 120,
+              "left_weight": "100"
+            },
+            {
+              "done": false,
+              "weight": "100",
+              "unit": "kg",
+              "reps": "8",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 120,
+              "left_weight": "100"
+            },
+            {
+              "done": false,
+              "weight": "100",
+              "unit": "kg",
+              "reps": "8",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 120,
+              "left_weight": "100"
+            }
+          ]
+        },
+        {
+          "name": "史密斯机提踵",
+          "sets": [
+            {
+              "done": false,
+              "weight": "100",
+              "unit": "kg",
+              "reps": "15",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "100"
+            },
+            {
+              "done": false,
+              "weight": "100",
+              "unit": "kg",
+              "reps": "15",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "100"
+            },
+            {
+              "done": false,
+              "weight": "100",
+              "unit": "kg",
+              "reps": "15",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "100"
+            },
+            {
+              "done": false,
+              "weight": "100",
+              "unit": "kg",
+              "reps": "15",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "100"
+            }
+          ]
+        },
+        {
+          "name": "器械倒蹬(版本2)",
+          "sets": [
+            {
+              "done": false,
+              "weight": "131.5",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "131.5"
+            },
+            {
+              "done": false,
+              "weight": "131.5",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "131.5"
+            },
+            {
+              "done": false,
+              "weight": "131.5",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "131.5"
+            },
+            {
+              "done": false,
+              "weight": "131.5",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "131.5"
+            }
+          ]
+        },
+        {
+          "name": "坐姿腿弯举",
+          "sets": [
+            {
+              "done": false,
+              "weight": "68",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "68"
+            },
+            {
+              "done": false,
+              "weight": "68",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "68"
+            },
+            {
+              "done": false,
+              "weight": "68",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "68"
+            },
+            {
+              "done": false,
+              "weight": "68",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "68"
+            }
+          ]
+        },
+        {
+          "name": "坐姿髋外展",
+          "sets": [
+            {
+              "done": false,
+              "weight": "59",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "59"
+            },
+            {
+              "done": false,
+              "weight": "59",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "59"
+            },
+            {
+              "done": false,
+              "weight": "59",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "59"
+            },
+            {
+              "done": false,
+              "weight": "59",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "59"
+            }
+          ]
+        },
+        {
+          "name": "坐姿髋内收",
+          "sets": [
+            {
+              "done": false,
+              "weight": "68",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "68"
+            },
+            {
+              "done": false,
+              "weight": "68",
+              "unit": "kg",
+              "reps": "12",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "68"
+            },
+            {
+              "done": false,
+              "weight": "68",
+              "unit": "kg",
+              "reps": "15",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "68"
+            },
+            {
+              "done": false,
+              "weight": "68",
+              "unit": "kg",
+              "reps": "15",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": "68"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "腰腹",
+      "start_time": 1767138628691,
+      "end_time": 1767140399841,
+      "duration_minutes": 29,
+      "calories": 105.8,
+      "training_load": 0,
+      "movements": [
+        {
+          "name": "器械卷腹",
+          "sets": [
+            {
+              "done": true,
+              "weight": "59",
+              "unit": "kg",
+              "reps": "18",
+              "time": 1,
+              "rpe": "",
+              "note": "",
+              "set_type": "热",
+              "rest_seconds": 60,
+              "left_weight": null
+            },
+            {
+              "done": true,
+              "weight": "77.1",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "77.1"
+            },
+            {
+              "done": true,
+              "weight": "77.1",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "77.1"
+            },
+            {
+              "done": true,
+              "weight": "77.1",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "77.1"
+            },
+            {
+              "done": true,
+              "weight": "77.1",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "77.1"
+            }
+          ]
+        },
+        {
+          "name": "悬挂抬腿",
+          "sets": [
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": null
+            },
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": null
+            },
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": null
+            },
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": null
+            }
+          ]
+        },
+        {
+          "name": "绳索跪姿卷腹",
+          "sets": [
+            {
+              "done": true,
+              "weight": "39.7",
+              "unit": "kg",
+              "reps": "15",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "39.7"
+            },
+            {
+              "done": false,
+              "weight": "39.7",
+              "unit": "kg",
+              "reps": "15",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "39.7"
+            },
+            {
+              "done": false,
+              "weight": "39.7",
+              "unit": "kg",
+              "reps": "15",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "39.7"
+            },
+            {
+              "done": false,
+              "weight": "39.7",
+              "unit": "kg",
+              "reps": "15",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": "39.7"
+            }
+          ]
+        },
+        {
+          "name": "仰卧抬腿",
+          "sets": [
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "18",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": null
+            },
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "18",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": null
+            },
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "18",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": null
+            },
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "18",
+              "time": 60,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 60,
+              "left_weight": null
+            }
+          ]
+        },
+        {
+          "name": "卷腹",
+          "sets": [
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "18",
+              "time": 45,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": null
+            },
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "18",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": null
+            },
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "18",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": null
+            },
+            {
+              "done": true,
+              "weight": "",
+              "unit": "kg",
+              "reps": "18",
+              "time": 0,
+              "rpe": "",
+              "note": "",
+              "set_type": "",
+              "rest_seconds": 45,
+              "left_weight": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "核心",
+      "start_time": 1767156424000,
+      "end_time": 1767157512000,
+      "duration_minutes": 18,
+      "calories": 73.2,
+      "training_load": 1,
+      "movements": []
+    },
+    {
+      "title": "力量训练",
+      "start_time": 1767154450000,
+      "end_time": 1767156315000,
+      "duration_minutes": 31,
+      "calories": 166.2,
+      "training_load": 11,
+      "movements": []
+    },
+    {
+      "title": "力量训练",
+      "start_time": 1767153713000,
+      "end_time": 1767154430000,
+      "duration_minutes": 11,
+      "calories": 76.5,
+      "training_load": 4,
+      "movements": []
+    }
+  ],
+  "cardio_activities": [
+    {
+      "name": "2025科韵公园·半程马拉松",
+      "sport_type": 100,
+      "duration_seconds": 6144,
+      "distance_meters": 21110.69,
+      "avg_hr": 163,
+      "calories": 1332.2,
+      "training_load": 377
+    }
+  ],
+  "daily_metrics": {
+    "date": "20251231",
+    "avg_sleep_hrv": 67.0,
+    "baseline": 62.0,
+    "interval_list": [
+      5,
+      44,
+      53,
+      71
+    ],
+    "rhr": 50,
+    "training_load": 393,
+    "training_load_ratio": 1.29,
+    "tired_rate": 32.0,
+    "ati": 141.0,
+    "cti": 109.0,
+    "performance": 4,
+    "distance": 0.0,
+    "duration": 0,
+    "vo2max": 53,
+    "lthr": 167,
+    "ltsp": 276,
+    "stamina_level": 83.1,
+    "stamina_level_7d": 106.0
+  },
+  "sleep_data": {
+    "date": "20251231",
+    "total_duration_minutes": 447,
+    "phases": {
+      "deep_minutes": 76,
+      "light_minutes": 243,
+      "rem_minutes": 128,
+      "awake_minutes": 19,
+      "nap_minutes": null
+    },
+    "avg_hr": 53,
+    "min_hr": 47,
+    "max_hr": 62,
+    "quality_score": null
+  },
+  "summary": {
+    "total_load": 393,
+    "total_calories": 1753.8,
+    "total_duration": 102,
+    "workout_count": 6
+  }
+}
