@@ -5,928 +5,488 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>训练分析报告 - 2026-06-29</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #0d0d0d;
+    color: #f5f5f7;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+.container { max-width: 900px; margin: 0 auto; }
+.header { text-align: center; margin-bottom: 32px; }
+.header .date { color: #8e8e93; font-size: 14px; margin-bottom: 6px; }
+.header h1 { font-size: 32px; font-weight: 700; letter-spacing: 1px; }
+.header .subtitle { color: #00d4aa; font-size: 16px; margin-top: 8px; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+.global-toggle { text-align: center; margin-bottom: 24px; }
+.global-toggle button {
+    background: #1c1c1e; color: #00d4aa; border: 1px solid #00d4aa;
+    padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 14px; margin: 0 6px;
+}
+.global-toggle button:hover { background: #232326; }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }
+.overview-card { background: #1c1c1e; border-radius: 20px; padding: 28px; margin-bottom: 24px; }
+.overview-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.overview-title { font-size: 20px; font-weight: 600; }
+.ring-wrap { position: relative; width: 110px; height: 110px; }
+.ring-bg, .ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; }
+.ring-bg { stroke: #2c2c2e; }
+.ring-fill { stroke: #00d4aa; stroke-dasharray: 259 345; }
+.ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+.ring-text .num { font-size: 26px; font-weight: 700; }
+.ring-text .label { font-size: 12px; color: #8e8e93; }
+.overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.overview-item { text-align: center; }
+.overview-item .value { font-size: 26px; font-weight: 700; color: #fff; }
+.overview-item .label { font-size: 12px; color: #8e8e93; margin-top: 4px; }
 
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
-            text-align: center;
-        }
+.section { margin-bottom: 16px; }
+.fold-card { background: #1c1c1e; border-radius: 16px; overflow: hidden; }
+.fold-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 20px; cursor: pointer; user-select: none;
+}
+.fold-header:hover { background: #232326; }
+.fold-title { display: flex; align-items: center; gap: 10px; }
+.fold-title .icon-emoji { font-size: 22px; }
+.fold-title .text { font-size: 18px; font-weight: 700; }
+.fold-title .badge {
+    background: #2c2c2e; color: #8e8e93; font-size: 12px;
+    padding: 3px 10px; border-radius: 12px; margin-left: 8px;
+}
+.fold-arrow { font-size: 14px; color: #8e8e93; transition: transform 0.2s; }
+.fold-card.open .fold-arrow { transform: rotate(180deg); }
+.fold-body { display: none; padding: 0 20px 20px; }
+.fold-card.open .fold-body { display: block; }
 
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
+.card { background: #1c1c1e; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+.detail-row { font-size: 12px; color: #8e8e93; margin-top: 6px; display: flex; gap: 16px; flex-wrap: wrap; }
+.detail-row span { color: #f5f5f7; }
 
-        .content {
-            padding: 40px;
-        }
+.strength-summary { display: flex; gap: 24px; font-size: 13px; color: #8e8e93; margin-bottom: 16px; flex-wrap: wrap; }
+.strength-summary span { color: #00d4aa; font-weight: 600; }
+.movement { display: flex; align-items: flex-start; gap: 14px; padding: 16px 0; border-bottom: 1px solid #2c2c2e; }
+.movement:last-child { border-bottom: none; padding-bottom: 0; }
+.movement:first-child { padding-top: 0; }
+.movement-num { width: 36px; height: 36px; border-radius: 50%; background: #2c2c2e; color: #00d4aa; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.movement-info { flex: 1; }
+.movement-name { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+.sets-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.set-tag { background: #2c2c2e; padding: 8px 12px; border-radius: 10px; font-size: 13px; color: #f5f5f7; }
+.set-tag .main { font-weight: 600; }
+.set-tag .type { color: #ff9f0a; font-size: 11px; margin-right: 4px; }
+.set-tag .rest { color: #8e8e93; font-size: 11px; margin-left: 4px; }
+.set-tag .extra { color: #8e8e93; font-size: 11px; margin-left: 4px; }
+.mov-detail { color: #8e8e93; font-size: 12px; margin-top: 8px; }
+.mov-detail span { color: #f5f5f7; }
 
-        .section {
-            margin-bottom: 40px;
-        }
+.activity-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 14px; }
+.activity-grid .item .num { font-size: 22px; font-weight: 700; }
+.activity-grid .item .label { font-size: 12px; color: #8e8e93; margin-top: 2px; }
 
-        .section h2 {
-            font-size: 1.8em;
-            color: #333;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #667eea;
-        }
+.metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.metric-card { background: #1c1c1e; border-radius: 16px; padding: 18px; }
+.metric-card .label { font-size: 12px; color: #8e8e93; margin-bottom: 8px; }
+.metric-card .value { font-size: 24px; font-weight: 700; }
+.metric-card .unit { font-size: 12px; color: #8e8e93; margin-left: 2px; }
+.metric-card .sub { font-size: 11px; color: #8e8e93; margin-top: 6px; }
 
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
+.sleep-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.sleep-time { font-size: 32px; font-weight: 700; }
+.sleep-quality { background: #2c2c2e; padding: 6px 14px; border-radius: 20px; font-size: 14px; color: #00d4aa; }
+.sleep-bar { height: 14px; border-radius: 7px; background: #2c2c2e; overflow: hidden; display: flex; margin-bottom: 14px; }
+.sleep-bar span { height: 100%; }
+.deep { background: #0a84ff; }
+.light { background: #64d2ff; }
+.rem { background: #bf5af2; }
+.awake { background: #ff9f0a; }
+.sleep-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.sleep-hr { color: #8e8e93; font-size: 13px; margin-top: 16px; }
 
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
+.analysis-card { background: #161618; border-radius: 14px; padding: 18px; margin-bottom: 12px; }
+.analysis-card h3 { font-size: 15px; color: #00d4aa; margin-bottom: 10px; }
+.analysis-card ul { list-style: none; }
+.analysis-card li { padding: 5px 0; font-size: 13px; line-height: 1.6; color: #d1d1d6; border-bottom: 1px solid #2c2c2e; }
+.analysis-card li:last-child { border-bottom: none; }
+.analysis-card .highlight { color: #fff; font-weight: 600; }
+.analysis-card .warn { color: #ff9f0a; }
+.analysis-card .good { color: #00d4aa; }
 
-        .stat-card h3 {
-            font-size: 0.9em;
-            opacity: 0.9;
-            margin-bottom: 10px;
-        }
+.score-card { display: flex; align-items: center; justify-content: space-between; background: #1c1c1e; border-radius: 20px; padding: 28px; margin-bottom: 24px; }
+.score-left { flex: 1; }
+.score-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.score-desc { color: #8e8e93; font-size: 13px; }
+.score-right { text-align: right; }
+.score-value { font-size: 48px; font-weight: 700; line-height: 1; }
+.score-value.good { color: #00d4aa; }
+.score-value.warn { color: #ff9f0a; }
+.score-value.danger { color: #ff453a; }
+.score-value.neutral { color: #0a84ff; }
+.readiness-badge { display: inline-block; margin-top: 10px; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+.readiness-badge.good { background: rgba(0, 212, 170, 0.15); color: #00d4aa; }
+.readiness-badge.warn { background: rgba(255, 159, 10, 0.15); color: #ff9f0a; }
+.readiness-badge.danger { background: rgba(255, 69, 58, 0.15); color: #ff453a; }
+.readiness-badge.neutral { background: rgba(10, 132, 255, 0.15); color: #0a84ff; }
+.metric-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+.metric-row .metric { background: #2c2c2e; padding: 8px 12px; border-radius: 10px; font-size: 13px; }
+.metric-row .metric .label { color: #8e8e93; margin-right: 6px; }
+.metric-row .metric .value { color: #f5f5f7; font-weight: 600; }
+.trend-up { color: #00d4aa; }
+.trend-down { color: #ff453a; }
+.trend-flat { color: #8e8e93; }
 
-        .stat-card .value {
-            font-size: 2em;
-            font-weight: 700;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            background: #f9f9f9;
-        }
-
-        th {
-            background: #667eea;
-            color: white;
-            padding: 15px;
-            text-align: left;
-        }
-
-        td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .badge-success { background: #d4edda; color: #155724; }
-        .badge-warning { background: #fff3cd; color: #856404; }
-        .badge-danger  { background: #f8d7da; color: #721c24; }
-
-        .alert {
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid;
-        }
-
-        .alert-info    { background: #e7f3ff; border-color: #0066cc; color: #004085; }
-        .alert-warning { background: #fffbea; border-color: #ffc107; color: #856404; }
-        .alert-danger  { background: #ffe5e5; border-color: #dc3545; color: #721c24; }
-
-        .recommendation {
-            background: #f0f4ff;
-            border-left: 4px solid #667eea;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .recommendation h4 {
-            color: #667eea;
-            margin-bottom: 8px;
-        }
-
-        .recommendation p {
-            color: #555;
-            line-height: 1.6;
-        }
-
-        .score-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .score-circle {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8em;
-            font-weight: 700;
-            color: white;
-            margin: 0 auto 10px;
-        }
-
-        .score-good { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
-        .score-fair { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-        .score-poor { background: linear-gradient(135deg, #ff6a00 0%, #ee0979 100%); }
-
-        .footer {
-            background: #f9f9f9;
-            padding: 20px 40px;
-            text-align: center;
-            color: #666;
-            border-top: 1px solid #eee;
-        }
-    </style>
+.footer { text-align: center; color: #8e8e93; font-size: 12px; margin-top: 40px; }
+</style>
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <div class="date">2026-06-29 周一</div>
             <h1>训练分析报告</h1>
-            <p>2026-06-29</p>
+            <div class="subtitle">今天有 3 练</div>
         </div>
 
-        <div class="content">
-            <!-- 综合分析(若有) -->
-            <div class="section"><h2>综合分析</h2><div class="score-grid">
-                <div style="text-align:center;">
-                    <div class="score-circle score-good">8.5</div>
-                    <p style="color:#333; font-weight:600;">恢复状态</p>
-                </div>
-                <div style="text-align:center;">
-                    <div class="score-circle score-good">8.5</div>
-                    <p style="color:#333; font-weight:600;">训练负荷</p>
-                </div>
-                <div style="text-align:center;">
-                    <div class="score-circle score-good">8.0</div>
-                    <p style="color:#333; font-weight:600;">力量表现</p>
-                </div>
-                <div style="text-align:center;">
-                    <div class="score-circle score-fair">6.5</div>
-                    <p style="color:#333; font-weight:600;">睡眠质量</p>
-                </div>
-                <div style="text-align:center;">
-                    <div class="score-circle score-good">8.0</div>
-                    <p style="color:#333; font-weight:600;">综合评分</p>
-                </div></div>
-        <div class="alert alert-info">
-            <strong>核心诊断</strong>
-            <p style="margin-top:8px;">今天是一个高质量训练日。HRV 回升至 68(略高于基线 67),负荷比 1.0、疲劳率低、表现评分 +2,身体处于良好的可训练状态,三场训练(胸/三头/轻松跑)安排合理、强度可控。唯一短板是睡眠总时长偏短(5.2 小时),且次日(6/30)进一步下滑——这是本周需要优先盯住的趋势,而非今天的单点问题。</p>
-        </div><h3 style="color:#333; margin:20px 0 12px;">🔋 恢复状态</h3><p style="color:#666; margin-bottom:12px; line-height:1.6;">恢复指标整体向好。HRV 从前一日的低谷 48 大幅反弹到 68,重新站上基线(67)之上,说明身体已从 6/28 的疲劳中恢复。静息心率 49 bpm 稳定偏低,反映良好的心肺基础。疲劳率 +1、表现评分 +2,均指向&#x27;状态在线、可正常训练&#x27;。</p><table><thead><tr><th>指标</th><th>数值</th><th>评价</th></tr></thead><tbody>
-                    <tr>
-                        <td>HRV / 基线</td>
-                        <td>68 / 67 ms</td>
-                        <td><span class="badge badge-success">✅ 高于基线,恢复良好</span></td>
-                    </tr>
-                    <tr>
-                        <td>HRV 日间变化</td>
-                        <td>48 → 68 (+20)</td>
-                        <td><span class="badge badge-success">✅ 大幅回升</span></td>
-                    </tr>
-                    <tr>
-                        <td>静息心率</td>
-                        <td>49 bpm</td>
-                        <td><span class="badge badge-success">✅ 稳定偏低</span></td>
-                    </tr>
-                    <tr>
-                        <td>疲劳率</td>
-                        <td>+1</td>
-                        <td><span class="badge badge-success">✅ 疲劳度低</span></td>
-                    </tr>
-                    <tr>
-                        <td>表现评分</td>
-                        <td>+2</td>
-                        <td><span class="badge badge-success">✅ 状态良好</span></td>
-                    </tr></tbody></table><h3 style="color:#333; margin:20px 0 12px;">📊 训练负荷</h3><p style="color:#666; margin-bottom:12px; line-height:1.6;">当日总负荷 84,负荷比(急性/慢性)1.0,处于&#x27;维持区间&#x27;——既没有过载风险,也保持了足够的训练刺激。负荷主要来自轻松跑(80),两场力量各 2,分布健康。结合 HRV 回升,今天的负荷与身体恢复能力匹配得当。</p><table><thead><tr><th>指标</th><th>数值</th><th>评价</th></tr></thead><tbody>
-                    <tr>
-                        <td>当日总负荷</td>
-                        <td>84</td>
-                        <td><span class="badge badge-success">✅ 适中</span></td>
-                    </tr>
-                    <tr>
-                        <td>负荷比(急/慢)</td>
-                        <td>1.0</td>
-                        <td><span class="badge badge-success">✅ 平衡,无过训</span></td>
-                    </tr>
-                    <tr>
-                        <td>负荷构成</td>
-                        <td>跑 80 · 力量 2+2</td>
-                        <td><span class="badge badge-success">✅ 有氧为主</span></td>
-                    </tr>
-                    <tr>
-                        <td>体能水平</td>
-                        <td>86.7</td>
-                        <td><span class="badge badge-success">✅ 稳定</span></td>
-                    </tr></tbody></table><h3 style="color:#333; margin:20px 0 12px;">💪 力量表现</h3><p style="color:#666; margin-bottom:12px; line-height:1.6;">完成胸部(5 动作)与三头(4 动作)两场力量训练,所有组均标记完成,执行度高。胸部以史密斯机卧推为主线,顶峰组 62.5kg×10 连续 3 组,强度稳定;三头四个动作覆盖大重量(仰卧臂屈伸)到孤立(绳索下压)的完整刺激。单日数据无法评估进阶趋势,需累积多日后对比同动作重量变化。</p><table><thead><tr><th>指标</th><th>数值</th><th>评价</th></tr></thead><tbody>
-                    <tr>
-                        <td>胸部训练</td>
-                        <td>5 动作 / 60 分钟 / 237 千卡</td>
-                        <td><span class="badge badge-success">✅ 完整</span></td>
-                    </tr>
-                    <tr>
-                        <td>三头训练</td>
-                        <td>4 动作 / 35 分钟 / 146 千卡</td>
-                        <td><span class="badge badge-success">✅ 完整</span></td>
-                    </tr>
-                    <tr>
-                        <td>卧推顶峰组</td>
-                        <td>62.5kg × 10 × 3</td>
-                        <td><span class="badge badge-success">✅ 强度稳定</span></td>
-                    </tr>
-                    <tr>
-                        <td>组完成度</td>
-                        <td>全部完成</td>
-                        <td><span class="badge badge-success">✅ 执行度高</span></td>
-                    </tr></tbody></table><h3 style="color:#333; margin:20px 0 12px;">😴 睡眠质量</h3><p style="color:#666; margin-bottom:12px; line-height:1.6;">睡眠是今天唯一的短板,但呈&#x27;时长不足、质量尚可&#x27;的特点。总时长 311 分钟(5.2 小时)低于建议的 7-8 小时;不过深睡 81 分钟(占比 26%,优秀)、清醒仅 8 分钟(极佳,说明睡眠连续性好)。REM 58 分钟偏低,与总时长被压缩有关。真正值得警惕的是趋势:次日(6/30)睡眠继续降到 275 分钟、清醒飙到 56 分钟、HRV 回落到 59——连续两晚睡眠债正在累积。</p><table><thead><tr><th>指标</th><th>数值</th><th>评价</th></tr></thead><tbody>
-                    <tr>
-                        <td>总时长</td>
-                        <td>311 分 (5.2 小时)</td>
-                        <td><span class="badge badge-warning">🟡 偏短</span></td>
-                    </tr>
-                    <tr>
-                        <td>深睡</td>
-                        <td>81 分 (26%)</td>
-                        <td><span class="badge badge-success">✅ 优秀</span></td>
-                    </tr>
-                    <tr>
-                        <td>清醒</td>
-                        <td>8 分</td>
-                        <td><span class="badge badge-success">✅ 连续性极佳</span></td>
-                    </tr>
-                    <tr>
-                        <td>REM</td>
-                        <td>58 分</td>
-                        <td><span class="badge badge-warning">🟡 偏低</span></td>
-                    </tr>
-                    <tr>
-                        <td>次日趋势</td>
-                        <td>311 → 275 分</td>
-                        <td><span class="badge badge-warning">🟡 继续下滑</span></td>
-                    </tr></tbody></table><h3 style="color:#333; margin:25px 0 15px;">建议</h3>
-            <div class="recommendation">
-                <h4>优先补足睡眠时长</h4>
-                <p>今天各项训练与恢复指标都好,唯独睡眠时长是全链条最弱的一环。深睡和连续性已经很好,缺的是&#x27;总量&#x27;——建议把入睡时间提前 30-45 分钟,目标回到 6.5 小时以上。考虑到 6/30 已出现连续第二晚下滑,这件事的优先级高于增加训练量。</p>
-            </div>
-            <div class="recommendation">
-                <h4>维持当前训练节奏</h4>
-                <p>负荷比 1.0、HRV 在基线之上,说明现在的训练量与恢复能力是匹配的,不需要刻意加码或减量。可以按计划继续推进力量+轻松跑的组合。</p>
-            </div>
-            <div class="recommendation">
-                <h4>盯住 HRV 与清醒时间</h4>
-                <p>把 HRV 是否守住基线(67 上下)、夜间清醒是否回到 15 分钟以内,作为接下来 2-3 天的观察重点。若 HRV 跌破 60 且清醒时间持续偏高,应主动安排一个恢复日。</p>
-            </div><h3 style="color:#333; margin:25px 0 15px;">后续训练计划</h3><table><thead><tr><th>日期</th><th>训练内容</th><th>强度</th><th>说明</th></tr></thead><tbody>
-                    <tr>
-                        <td>6/29(今日)</td>
-                        <td>胸 + 三头 + 轻松跑 7.4km</td>
-                        <td>🟡 中</td>
-                        <td>已完成,负荷 84,状态良好</td>
-                    </tr>
-                    <tr>
-                        <td>6/30</td>
-                        <td>按计划训练(注意睡眠已连续下滑)</td>
-                        <td>🟡 中</td>
-                        <td>优先补觉,训练量不增</td>
-                    </tr>
-                    <tr>
-                        <td>7/1</td>
-                        <td>视 HRV 决定:≥65 可中等强度,&lt;60 转恢复</td>
-                        <td>🟢 低-中</td>
-                        <td>以恢复状态为准</td>
-                    </tr></tbody></table><p style="color:#999; font-size:0.85em; margin-top:20px;">分析由 Claude (Opus 4.8) 生成 · 仅供参考,不替代专业医疗/教练建议</p></div>
+        <div class="global-toggle">
+            <button onclick="toggleAll(true)">全部展开</button>
+            <button onclick="toggleAll(false)">全部折叠</button>
+        </div>
 
-            <!-- 当日概览 -->
-            <div class="section">
-                <h2>当日概览</h2>
-                <div class="stat-grid">
-                    <div class="stat-card">
-                        <h3>训练场次</h3>
-                        <div class="value">3</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>有氧时长</h3>
-                        <div class="value">40</div>
-                        <div>分钟</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>消耗热量</h3>
-                        <div class="value">750</div>
-                        <div>千卡</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>训练负荷</h3>
-                        <div class="value">84</div>
+        <div class="overview-card">
+            <div class="overview-top">
+                <div>
+                    <div class="overview-title">今日训练负荷</div>
+                    <div style="color:#8e8e93;font-size:13px;margin-top:8px">力量 + 有氧综合</div>
+                </div>
+                <div class="ring-wrap">
+                    <svg width="110" height="110" viewBox="0 0 120 120">
+                        <circle class="ring-bg" cx="60" cy="60" r="50" transform="rotate(135 60 60)"></circle>
+                        <circle class="ring-fill" cx="60" cy="60" r="50" transform="rotate(135 60 60)"></circle>
+                    </svg>
+                    <div class="ring-text">
+                        <div class="num">84</div>
+                        <div class="label">负荷</div>
                     </div>
                 </div>
             </div>
+            <div class="overview-grid">
+                <div class="overview-item"><div class="value">3</div><div class="label">训练场次</div></div>
+                <div class="overview-item"><div class="value">00:40:00</div><div class="label">训练时长</div></div>
+                <div class="overview-item"><div class="value">750</div><div class="label">消耗热量(千卡)</div></div>
+                <div class="overview-item"><div class="value">4</div><div class="label">力量负荷</div></div>
+            </div>
+        </div>
 
-            <!-- 力量训练 -->
-            <div class="section"><h2>力量训练</h2>
-        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #333; margin-bottom: 15px;">胸部</h3>
-            <p style="color: #666; margin-bottom: 10px;">时长:60 分钟 &nbsp;·&nbsp; 237 千卡 &nbsp;·&nbsp; 负荷 2</p>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>动作</th>
-                        <th>组</th>
-                        <th>类型</th>
-                        <th>重量</th>
-                        <th>次数</th>
-                        <th>左侧</th>
-                        <th>休息</th>
-                        <th>完成</th>
-                    </tr>
-                </thead>
-                <tbody>
         
-                    <tr>
-                        <td>史密斯机卧推</td>
-                        <td>第 1 组</td>
-                        <td><span class="badge badge-warning">热身</span></td>
-                        <td>20 <small style='color:#888;'>(左70)</small> kg</td>
-                        <td>15 次</td>
-                        <td>70</td>
-                        <td>120 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>史密斯机卧推</td>
-                        <td>第 2 组</td>
-                        <td><span class="badge badge-warning">热身</span></td>
-                        <td>40 <small style='color:#888;'>(左90)</small> kg</td>
-                        <td>12 次</td>
-                        <td>90</td>
-                        <td>120 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>史密斯机卧推</td>
-                        <td>第 3 组</td>
-                        <td><span class="badge badge-warning">热身</span></td>
-                        <td>50 <small style='color:#888;'>(左90)</small> kg</td>
-                        <td>10 次</td>
-                        <td>90</td>
-                        <td>120 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>史密斯机卧推</td>
-                        <td>第 4 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>60 kg</td>
-                        <td>10 次</td>
-                        <td>60</td>
-                        <td>120 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>史密斯机卧推</td>
-                        <td>第 5 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>62.5 kg</td>
-                        <td>10 次</td>
-                        <td>62.5</td>
-                        <td>120 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>史密斯机卧推</td>
-                        <td>第 6 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>62.5 kg</td>
-                        <td>10 次</td>
-                        <td>62.5</td>
-                        <td>120 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>史密斯机卧推</td>
-                        <td>第 7 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>62.5 kg</td>
-                        <td>10 次</td>
-                        <td>62.5</td>
-                        <td>120 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>上斜哑铃卧推</td>
-                        <td>第 1 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>50 kg</td>
-                        <td>12 次</td>
-                        <td>50</td>
-                        <td>90 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>上斜哑铃卧推</td>
-                        <td>第 2 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>50 kg</td>
-                        <td>12 次</td>
-                        <td>50</td>
-                        <td>90 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>上斜哑铃卧推</td>
-                        <td>第 3 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>50 kg</td>
-                        <td>12 次</td>
-                        <td>50</td>
-                        <td>90 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>上斜哑铃卧推</td>
-                        <td>第 4 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>50 kg</td>
-                        <td>12 次</td>
-                        <td>50</td>
-                        <td>90 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>器械胸部推举</td>
-                        <td>第 1 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>45.4 kg</td>
-                        <td>12 次</td>
-                        <td>45.4</td>
-                        <td>-</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>器械胸部推举</td>
-                        <td>第 2 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>45.4 kg</td>
-                        <td>7 次</td>
-                        <td>45.4</td>
-                        <td>-</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>器械胸部推举</td>
-                        <td>第 3 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>40.6 kg</td>
-                        <td>10 次</td>
-                        <td>40.6</td>
-                        <td>-</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>器械胸部推举</td>
-                        <td>第 4 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>40.6 kg</td>
-                        <td>8 次</td>
-                        <td>40.6</td>
-                        <td>-</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>器械推胸</td>
-                        <td>第 1 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>54.4 kg</td>
-                        <td>12 次</td>
-                        <td>-</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>器械推胸</td>
-                        <td>第 2 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>54.4 kg</td>
-                        <td>12 次</td>
-                        <td>-</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>器械推胸</td>
-                        <td>第 3 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>54.4 kg</td>
-                        <td>12 次</td>
-                        <td>-</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>器械推胸</td>
-                        <td>第 4 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>54.4 kg</td>
-                        <td>12 次</td>
-                        <td>-</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>把手式蝴蝶机飞鸟</td>
-                        <td>第 1 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>27.2 kg</td>
-                        <td>12 次</td>
-                        <td>27.2</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>把手式蝴蝶机飞鸟</td>
-                        <td>第 2 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>27.2 kg</td>
-                        <td>12 次</td>
-                        <td>27.2</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>把手式蝴蝶机飞鸟</td>
-                        <td>第 3 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>27.2 kg</td>
-                        <td>12 次</td>
-                        <td>27.2</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>把手式蝴蝶机飞鸟</td>
-                        <td>第 4 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>27.2 kg</td>
-                        <td>12 次</td>
-                        <td>27.2</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                </tbody>
-            </table>
+    <div class="section fold-card open" data-fold="section">
+        <div class="fold-header" onclick="toggleCard(this.parentElement)">
+            <div class="fold-title">
+                <span class="icon-emoji">💪</span>
+                <span class="text">力量训练</span>
+                <span class="badge">2 场训练 · 39 组</span>
+            </div>
+            <div class="fold-arrow">▼</div>
         </div>
-        
-        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #333; margin-bottom: 15px;">三头</h3>
-            <p style="color: #666; margin-bottom: 10px;">时长:35 分钟 &nbsp;·&nbsp; 146 千卡 &nbsp;·&nbsp; 负荷 2</p>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>动作</th>
-                        <th>组</th>
-                        <th>类型</th>
-                        <th>重量</th>
-                        <th>次数</th>
-                        <th>左侧</th>
-                        <th>休息</th>
-                        <th>完成</th>
-                    </tr>
-                </thead>
-                <tbody>
-        
-                    <tr>
-                        <td>仰卧杠铃臂屈伸</td>
-                        <td>第 1 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>25 kg</td>
-                        <td>15 次</td>
-                        <td>25</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>仰卧杠铃臂屈伸</td>
-                        <td>第 2 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>25 kg</td>
-                        <td>15 次</td>
-                        <td>25</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>仰卧杠铃臂屈伸</td>
-                        <td>第 3 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>25 kg</td>
-                        <td>15 次</td>
-                        <td>25</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>仰卧杠铃臂屈伸</td>
-                        <td>第 4 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>25 kg</td>
-                        <td>15 次</td>
-                        <td>25</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>哑铃过头臂屈伸</td>
-                        <td>第 1 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>25 kg</td>
-                        <td>15 次</td>
-                        <td>25</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>哑铃过头臂屈伸</td>
-                        <td>第 2 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>25 kg</td>
-                        <td>15 次</td>
-                        <td>25</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>哑铃过头臂屈伸</td>
-                        <td>第 3 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>25 kg</td>
-                        <td>15 次</td>
-                        <td>25</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>哑铃过头臂屈伸</td>
-                        <td>第 4 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>25 kg</td>
-                        <td>15 次</td>
-                        <td>25</td>
-                        <td>60 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>V-Bar 绳索下压</td>
-                        <td>第 1 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>23.8 kg</td>
-                        <td>15 次</td>
-                        <td>23.8</td>
-                        <td>45 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>V-Bar 绳索下压</td>
-                        <td>第 2 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>23.8 kg</td>
-                        <td>15 次</td>
-                        <td>23.8</td>
-                        <td>45 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>V-Bar 绳索下压</td>
-                        <td>第 3 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>26.1 kg</td>
-                        <td>15 次</td>
-                        <td>26.1</td>
-                        <td>45 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>V-Bar 绳索下压</td>
-                        <td>第 4 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>26.1 kg</td>
-                        <td>15 次</td>
-                        <td>26.1</td>
-                        <td>45 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>绳索俯身过顶三头肌伸展</td>
-                        <td>第 1 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>28.4 kg</td>
-                        <td>15 次</td>
-                        <td>28.4</td>
-                        <td>45 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>绳索俯身过顶三头肌伸展</td>
-                        <td>第 2 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>28.4 kg</td>
-                        <td>15 次</td>
-                        <td>28.4</td>
-                        <td>45 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>绳索俯身过顶三头肌伸展</td>
-                        <td>第 3 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>28.4 kg</td>
-                        <td>15 次</td>
-                        <td>28.4</td>
-                        <td>45 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                    <tr>
-                        <td>绳索俯身过顶三头肌伸展</td>
-                        <td>第 4 组</td>
-                        <td><span class="badge badge-success">正式</span></td>
-                        <td>28.4 kg</td>
-                        <td>15 次</td>
-                        <td>28.4</td>
-                        <td>45 秒</td>
-                        <td><span class="badge badge-success">完成</span></td>
-                    </tr>
-                
-                </tbody>
-            </table>
-        </div>
-        </div>
-
-            <!-- 有氧运动 -->
-            <div class="section"><h2>有氧运动</h2>
-        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #333; margin-bottom: 10px;">轻松跑</h3>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
-                <div>
-                    <p style="color: #999; font-size: 0.9em;">距离</p>
-                    <p style="font-size: 1.5em; font-weight: 700;">7.44 km</p>
+        <div class="fold-body">
+        <div class="fold-card open" style="margin-bottom:14px" data-fold="inner">
+            <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                <div class="fold-title">
+                    <span class="text" style="font-size:16px">胸部</span>
+                    <span class="badge">60分钟 · 23组 · 11665kg</span>
                 </div>
-                <div>
-                    <p style="color: #999; font-size: 0.9em;">时长</p>
-                    <p style="font-size: 1.5em; font-weight: 700;">41 分钟</p>
+                <div class="fold-arrow">▼</div>
+            </div>
+            <div class="fold-body">
+                <div class="detail-row" style="margin-bottom:12px">
+                    开始 <span>12:01</span> &nbsp;·&nbsp; 结束 <span>13:02</span>
                 </div>
-                <div>
-                    <p style="color: #999; font-size: 0.9em;">平均心率</p>
-                    <p style="font-size: 1.5em; font-weight: 700;">144 bpm</p>
-                </div>
-                <div>
-                    <p style="color: #999; font-size: 0.9em;">消耗热量</p>
-                    <p style="font-size: 1.5em; font-weight: 700;">367 千卡</p>
+                <div class="strength-summary">总重量 <span>11665 kg</span> &nbsp;·&nbsp; 消耗 <span>237 千卡</span> &nbsp;·&nbsp; 负荷 <span>2</span></div>
+                
+            <div class="movement">
+                <div class="movement-num">1</div>
+                <div class="movement-info">
+                    <div class="movement-name">史密斯机卧推</div>
+                    <div class="sets-row"><div class="set-tag"><span class="type">热</span><span class="main">20kg×15</span><span class="extra">左70</span><span class="rest">休120s</span></div><div class="set-tag"><span class="type">热</span><span class="main">40kg×12</span><span class="extra">左90</span><span class="rest">休120s</span></div><div class="set-tag"><span class="type">热</span><span class="main">50kg×10</span><span class="extra">左90</span><span class="rest">休120s</span></div><div class="set-tag"><span class="main">60kg×10</span><span class="extra">左60</span><span class="rest">休120s</span></div><div class="set-tag"><span class="main">62.5kg×10</span><span class="extra">左62.5</span><span class="rest">休120s</span></div><div class="set-tag"><span class="main">62.5kg×10</span><span class="extra">左62.5</span><span class="rest">休120s</span></div><div class="set-tag"><span class="main">62.5kg×10</span><span class="extra">左62.5</span><span class="rest">休120s</span></div></div>
+                    <div class="mov-detail">容量 <span>3755 kg</span> &nbsp;·&nbsp; 最大重量 <span>62 kg</span></div>
                 </div>
             </div>
-        </div>
-        </div>
-
-            <!-- 生理指标 -->
-            <div class="section"><h2>生理指标</h2><div class="stat-grid">
-                    <div class="stat-card">
-                        <h3>HRV(心率变异性)</h3>
-                        <div class="value">68.0</div>
-                        <div>ms</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>HRV 基线</h3>
-                        <div class="value">67.0</div>
-                        <div>ms</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>静息心率</h3>
-                        <div class="value">49</div>
-                        <div>bpm</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>训练负荷</h3>
-                        <div class="value">84</div>
-                        
-                    </div>
-                    <div class="stat-card">
-                        <h3>负荷比(急/慢)</h3>
-                        <div class="value">1.0</div>
-                        
-                    </div>
-                    <div class="stat-card">
-                        <h3>最大摄氧量</h3>
-                        <div class="value">56</div>
-                        
-                    </div>
-                    <div class="stat-card">
-                        <h3>体能水平</h3>
-                        <div class="value">86.7</div>
-                        
-                    </div></div></div>
-
-            <!-- 睡眠 -->
-            <div class="section"><h2>睡眠</h2>
-        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
-            <h3 style="color: #333; margin-bottom: 15px;">总时长:5 小时 11 分</h3>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
-                <div>
-                    <p style="color: #999; font-size: 0.9em;">深睡</p>
-                    <p style="font-size: 1.5em; font-weight: 700;">81 分</p>
-                </div>
-                <div>
-                    <p style="color: #999; font-size: 0.9em;">浅睡</p>
-                    <p style="font-size: 1.5em; font-weight: 700;">172 分</p>
-                </div>
-                <div>
-                    <p style="color: #999; font-size: 0.9em;">REM</p>
-                    <p style="font-size: 1.5em; font-weight: 700;">58 分</p>
-                </div>
-                <div>
-                    <p style="color: #999; font-size: 0.9em;">清醒</p>
-                    <p style="font-size: 1.5em; font-weight: 700;">8 分</p>
+            <div class="movement">
+                <div class="movement-num">2</div>
+                <div class="movement-info">
+                    <div class="movement-name">上斜哑铃卧推</div>
+                    <div class="sets-row"><div class="set-tag"><span class="main">50kg×12</span><span class="extra">左50</span><span class="rest">休90s</span></div><div class="set-tag"><span class="main">50kg×12</span><span class="extra">左50</span><span class="rest">休90s</span></div><div class="set-tag"><span class="main">50kg×12</span><span class="extra">左50</span><span class="rest">休90s</span></div><div class="set-tag"><span class="main">50kg×12</span><span class="extra">左50</span><span class="rest">休90s</span></div></div>
+                    <div class="mov-detail">容量 <span>2400 kg</span> &nbsp;·&nbsp; 最大重量 <span>50 kg</span></div>
                 </div>
             </div>
-            <p style="color: #666; margin-top: 12px;">睡眠平均心率:51 bpm</p>
+            <div class="movement">
+                <div class="movement-num">3</div>
+                <div class="movement-info">
+                    <div class="movement-name">器械胸部推举</div>
+                    <div class="sets-row"><div class="set-tag"><span class="main">45.4kg×12</span><span class="extra">左45.4</span></div><div class="set-tag"><span class="main">45.4kg×7</span><span class="extra">左45.4</span></div><div class="set-tag"><span class="main">40.6kg×10</span><span class="extra">左40.6</span></div><div class="set-tag"><span class="main">40.6kg×8</span><span class="extra">左40.6</span></div></div>
+                    <div class="mov-detail">容量 <span>1593 kg</span> &nbsp;·&nbsp; 最大重量 <span>45 kg</span></div>
+                </div>
+            </div>
+            <div class="movement">
+                <div class="movement-num">4</div>
+                <div class="movement-info">
+                    <div class="movement-name">器械推胸</div>
+                    <div class="sets-row"><div class="set-tag"><span class="main">54.4kg×12</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">54.4kg×12</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">54.4kg×12</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">54.4kg×12</span><span class="rest">休60s</span></div></div>
+                    <div class="mov-detail">容量 <span>2611 kg</span> &nbsp;·&nbsp; 最大重量 <span>54 kg</span></div>
+                </div>
+            </div>
+            <div class="movement">
+                <div class="movement-num">5</div>
+                <div class="movement-info">
+                    <div class="movement-name">把手式蝴蝶机飞鸟</div>
+                    <div class="sets-row"><div class="set-tag"><span class="main">27.2kg×12</span><span class="extra">左27.2</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">27.2kg×12</span><span class="extra">左27.2</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">27.2kg×12</span><span class="extra">左27.2</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">27.2kg×12</span><span class="extra">左27.2</span><span class="rest">休60s</span></div></div>
+                    <div class="mov-detail">容量 <span>1306 kg</span> &nbsp;·&nbsp; 最大重量 <span>27 kg</span></div>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="fold-card open" style="margin-bottom:14px" data-fold="inner">
+            <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                <div class="fold-title">
+                    <span class="text" style="font-size:16px">三头</span>
+                    <span class="badge">35分钟 · 16组 · 6201kg</span>
+                </div>
+                <div class="fold-arrow">▼</div>
+            </div>
+            <div class="fold-body">
+                <div class="detail-row" style="margin-bottom:12px">
+                    开始 <span>18:42</span> &nbsp;·&nbsp; 结束 <span>19:18</span>
+                </div>
+                <div class="strength-summary">总重量 <span>6201 kg</span> &nbsp;·&nbsp; 消耗 <span>146 千卡</span> &nbsp;·&nbsp; 负荷 <span>2</span></div>
+                
+            <div class="movement">
+                <div class="movement-num">1</div>
+                <div class="movement-info">
+                    <div class="movement-name">仰卧杠铃臂屈伸</div>
+                    <div class="sets-row"><div class="set-tag"><span class="main">25kg×15</span><span class="extra">左25</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">25kg×15</span><span class="extra">左25</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">25kg×15</span><span class="extra">左25</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">25kg×15</span><span class="extra">左25</span><span class="rest">休60s</span></div></div>
+                    <div class="mov-detail">容量 <span>1500 kg</span> &nbsp;·&nbsp; 最大重量 <span>25 kg</span></div>
+                </div>
+            </div>
+            <div class="movement">
+                <div class="movement-num">2</div>
+                <div class="movement-info">
+                    <div class="movement-name">哑铃过头臂屈伸</div>
+                    <div class="sets-row"><div class="set-tag"><span class="main">25kg×15</span><span class="extra">左25</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">25kg×15</span><span class="extra">左25</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">25kg×15</span><span class="extra">左25</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">25kg×15</span><span class="extra">左25</span><span class="rest">休60s</span></div></div>
+                    <div class="mov-detail">容量 <span>1500 kg</span> &nbsp;·&nbsp; 最大重量 <span>25 kg</span></div>
+                </div>
+            </div>
+            <div class="movement">
+                <div class="movement-num">3</div>
+                <div class="movement-info">
+                    <div class="movement-name">V-Bar 绳索下压</div>
+                    <div class="sets-row"><div class="set-tag"><span class="main">23.8kg×15</span><span class="extra">左23.8</span><span class="rest">休45s</span></div><div class="set-tag"><span class="main">23.8kg×15</span><span class="extra">左23.8</span><span class="rest">休45s</span></div><div class="set-tag"><span class="main">26.1kg×15</span><span class="extra">左26.1</span><span class="rest">休45s</span></div><div class="set-tag"><span class="main">26.1kg×15</span><span class="extra">左26.1</span><span class="rest">休45s</span></div></div>
+                    <div class="mov-detail">容量 <span>1497 kg</span> &nbsp;·&nbsp; 最大重量 <span>26 kg</span></div>
+                </div>
+            </div>
+            <div class="movement">
+                <div class="movement-num">4</div>
+                <div class="movement-info">
+                    <div class="movement-name">绳索俯身过顶三头肌伸展</div>
+                    <div class="sets-row"><div class="set-tag"><span class="main">28.4kg×15</span><span class="extra">左28.4</span><span class="rest">休45s</span></div><div class="set-tag"><span class="main">28.4kg×15</span><span class="extra">左28.4</span><span class="rest">休45s</span></div><div class="set-tag"><span class="main">28.4kg×15</span><span class="extra">左28.4</span><span class="rest">休45s</span></div><div class="set-tag"><span class="main">28.4kg×15</span><span class="extra">左28.4</span><span class="rest">休45s</span></div></div>
+                    <div class="mov-detail">容量 <span>1704 kg</span> &nbsp;·&nbsp; 最大重量 <span>28 kg</span></div>
+                </div>
+            </div>
+            </div>
+        </div></div>
+    </div>
+        
+    <div class="score-card">
+        <div class="score-left">
+            <div class="score-title">恢复评分</div>
+            <div class="score-desc">基于 HRV、静息心率、睡眠、疲劳度与负荷比综合计算</div>
+            <div class="metric-row"><div class="metric"><span class="label">HRV:</span><span class="value">68.0/67.0</span></div><div class="metric"><span class="label">RHR:</span><span class="value">49 bpm</span></div><div class="metric"><span class="label">睡眠:</span><span class="value">5 小时 11 分</span></div><div class="metric"><span class="label">疲劳:</span><span class="value">1.0%</span></div></div>
+        </div>
+        <div class="score-right">
+            <div class="score-value good">90</div>
+            <div class="readiness-badge good">适宜高强度</div>
         </div>
     </div>
+        
+        <div class="section fold-card open" data-fold="section">
+            <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                <div class="fold-title">
+                    <span class="icon-emoji">🏃</span>
+                    <span class="text">跑步</span>
+                    <span class="badge">1 场 · 00:40:00 · 367千卡</span>
+                </div>
+                <div class="fold-arrow">▼</div>
+            </div>
+            <div class="fold-body">
+            <div class="card">
+                <div style="font-size:18px;font-weight:700;margin-bottom:8px">轻松跑</div>
+                <div class="detail-row" style="margin-bottom:12px">
+                    运动类型 <span>跑步 (101)</span> &nbsp;·&nbsp; 训练负荷 <span>80</span>
+                </div>
+                <div class="activity-grid">
+                    <div class="item"><div class="num">7.44</div><div class="label">距离 km</div></div>
+                    <div class="item"><div class="num">00:40:00</div><div class="label">时长</div></div>
+                    <div class="item"><div class="num">5:29</div><div class="label">平均配速 min/km</div></div>
+                    <div class="item"><div class="num">144 bpm</div><div class="label">平均心率</div></div>
+                    <div class="item"><div class="num">367</div><div class="label">消耗 kcal</div></div>
+                </div>
+            </div></div>
         </div>
+        
+    <div class="section fold-card open" data-fold="section">
+        <div class="fold-header" onclick="toggleCard(this.parentElement)">
+            <div class="fold-title">
+                <span class="icon-emoji">❤️</span>
+                <span class="text">生理指标</span>
+                <span class="badge">11 项数据</span>
+            </div>
+            <div class="fold-arrow">▼</div>
+        </div>
+        <div class="fold-body">
+            <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">HRV</div>
+            <div class="value">68.0<span class="unit">ms</span></div>
+            <div class="sub">基线 67.0ms</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">静息心率</div>
+            <div class="value">49<span class="unit">bpm</span></div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">训练负荷</div>
+            <div class="value">84</div>
+            <div class="sub">负荷比 1.0</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">最大摄氧量</div>
+            <div class="value">56</div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">体能水平</div>
+            <div class="value">86.7</div>
+            <div class="sub">7日 101.0</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">疲劳度</div>
+            <div class="value">1.0<span class="unit">%</span></div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">有氧能力 ATI</div>
+            <div class="value">104.0</div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">无氧能力 CTI</div>
+            <div class="value">103.0</div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">乳酸阈值心率</div>
+            <div class="value">167<span class="unit">bpm</span></div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">乳酸阈值配速</div>
+            <div class="value">262</div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">表现指数</div>
+            <div class="value">2</div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">HRV 区间</div>
+            <div class="value" style="font-size:14px">5-47-57-77</div>
+        </div></div>
+        </div>
+    </div>
+        
+    <div class="section fold-card open" data-fold="section">
+        <div class="fold-header" onclick="toggleCard(this.parentElement)">
+            <div class="fold-title">
+                <span class="icon-emoji">🌙</span>
+                <span class="text">睡眠</span>
+                <span class="badge">5 小时 11 分</span>
+            </div>
+            <div class="fold-arrow">▼</div>
+        </div>
+        <div class="fold-body">
+            <div class="sleep-top">
+                <div class="sleep-time">5 小时 11 分</div>
+                <div class="sleep-quality">睡眠偏短</div>
+            </div>
+            <div class="sleep-bar">
+                <span class="deep" style="width:25.4%"></span>
+                <span class="light" style="width:53.9%"></span>
+                <span class="rem" style="width:18.2%"></span>
+                <span class="awake" style="width:2.5%"></span>
+            </div>
+            <div class="sleep-legend">
+                <div class="legend-item"><div class="legend-dot deep"></div>深睡 81分</div>
+                <div class="legend-item"><div class="legend-dot light"></div>浅睡 172分</div>
+                <div class="legend-item"><div class="legend-dot rem"></div>REM 58分</div>
+                <div class="legend-item"><div class="legend-dot awake"></div>清醒 8分</div>
+            </div>
+            <div class="sleep-hr">睡眠心率 47-60 bpm，平均 51 bpm</div>
+        </div>
+    </div>
+        
+    <div class="section fold-card open" data-fold="section">
+        <div class="fold-header" onclick="toggleCard(this.parentElement)">
+            <div class="fold-title">
+                <span class="icon-emoji">📊</span>
+                <span class="text">数据分析</span>
+                <span class="badge">7 项分析</span>
+            </div>
+            <div class="fold-arrow">▼</div>
+        </div>
+        <div class="fold-body">
+        <div class="analysis-card">
+            <h3>恢复状态</h3>
+            <ul><li>综合恢复评分 <span class='highlight'>90</span>，今日训练建议：<span class='good'>适宜高强度</span>。</li></ul>
+        </div>
+        <div class="analysis-card">
+            <h3>力量训练分析</h3>
+            <ul><li>今日<span class='highlight'>胸部</span>训练共 <span class='highlight'>5 个动作 23 组</span>，总容量约 <span class='highlight'>11.7 吨</span>，训练时长 01:00:00。</li><li>总容量 11.7 吨，较 14 日单日均值 9.7 吨 <span class='trend-up'>↑20%</span>。</li><li><span class='highlight'>史密斯机卧推</span>最大重量 <span class='highlight'>62kg</span>，可根据状态尝试渐进超负荷。</li><li><span class='highlight'>上斜哑铃卧推</span>稳定在 <span class='highlight'>50kg</span> 做组，力量维持良好。</li><li><span class='highlight'>器械胸部推举</span>最大重量 <span class='highlight'>45kg</span>，可根据状态尝试渐进超负荷。</li><li><span class='highlight'>器械推胸</span>稳定在 <span class='highlight'>54kg</span> 做组，力量维持良好。</li><li><span class='highlight'>把手式蝴蝶机飞鸟</span>稳定在 <span class='highlight'>27kg</span> 做组，力量维持良好。</li><li>本次训练性质判断为：<span class='highlight'>高强度综合训练</span>。</li><li>近 7 天 胸 部训练 2 次，建议下次训练轮换其他肌群。</li><li>整体训练强度适中，建议关键动作逐步增加 2.5-5kg 或 1-2 次重复。</li></ul>
+        </div>
+        <div class="analysis-card">
+            <h3>力量训练分析</h3>
+            <ul><li>今日<span class='highlight'>三头</span>训练共 <span class='highlight'>4 个动作 16 组</span>，总容量约 <span class='highlight'>6.2 吨</span>，训练时长 00:35:00。</li><li>总容量 6.2 吨，较 14 日单日均值 9.7 吨 <span class='trend-down'>↓36%</span>。</li><li><span class='highlight'>仰卧杠铃臂屈伸</span>稳定在 <span class='highlight'>25kg</span> 做组，力量维持良好。</li><li><span class='highlight'>哑铃过头臂屈伸</span>稳定在 <span class='highlight'>25kg</span> 做组，力量维持良好。</li><li><span class='highlight'>V-Bar 绳索下压</span>最大重量 <span class='highlight'>26kg</span>，可根据状态尝试渐进超负荷。</li><li><span class='highlight'>绳索俯身过顶三头肌伸展</span>稳定在 <span class='highlight'>28kg</span> 做组，力量维持良好。</li><li>本次训练性质判断为：<span class='highlight'>增肌容量训练</span>。</li><li>整体训练强度适中，建议关键动作逐步增加 2.5-5kg 或 1-2 次重复。</li></ul>
+        </div>
+        <div class="analysis-card">
+            <h3>跑步分析</h3>
+            <ul><li>今日跑步共 <span class='highlight'>1 场</span>，总距离 <span class='highlight'>7.44 km</span>，总时长 <span class='highlight'>00:40:00</span>，消耗 <span class='highlight'>367 千卡</span>。</li><li>跑步总时长较 14 日同类型日均 39 分钟 <span class='trend-flat'>↑4%</span>。</li><li>轻松跑 平均心率 144 bpm，处于有氧进阶区（M区）；平均配速 5:29。</li></ul>
+        </div>
+        <div class="analysis-card">
+            <h3>生理指标分析</h3>
+            <ul><li>HRV 为 <span class='highlight'>68.0 ms</span>，接近或高于基线，恢复状态良好。<span class='trend-flat'>↑2%</span></li><li>静息心率 <span class='highlight'>49 bpm</span>，较低，心肺基础较好。<span class='trend-down'>↑5%</span></li><li>训练负荷 84，负荷比 1.0，处于<span class='highlight'>维持区间</span>。</li><li>疲劳度 1.0%，体能水平 86.7，整体处于可训练状态，需结合睡眠判断恢复质量。</li><li>最大摄氧量 <span class='highlight'>56</span>，可作为有氧能力长期跟踪指标。</li><li>有氧能力 ATI 104.0，无氧能力 CTI 103.0。</li></ul>
+        </div>
+        <div class="analysis-card">
+            <h3>睡眠分析</h3>
+            <ul><li>睡眠总时长 <span class='warn'>5 小时 11 分</span>，明显偏短，可能影响恢复。</li><li>睡眠时长较 14 日均值 374 分钟 <span class='trend-down'>↓17%</span>，注意调整作息。</li><li>深睡占比约 <span class='highlight'>25%</span>，比例正常；清醒占比 3%。</li><li>睡眠平均心率 51 bpm，夜间心率平稳。</li><li>建议根据睡眠情况调整今日训练强度，睡眠不足时避免高强度训练。</li></ul>
+        </div>
+        <div class="analysis-card">
+            <h3>恢复建议</h3>
+            <ul><li>今日综合负荷 84，较 14 日均值 38 <span class='trend-up'>↑124%</span>。</li><li>睡眠不足，明天如训练建议选择低强度有氧或技术练习，避免大重量力量训练。</li></ul>
+        </div></div>
+    </div>
 
         <div class="footer">
-            <p>数据来源:训记 App + 高驰 App</p>
-            <p style="margin-top: 10px; font-size: 0.9em;">生成时间:2026-07-01 20:06:47</p>
+            <p>数据来源: 训记 App + 高驰 App · 生成时间: 2026-07-02 19:30:07</p>
         </div>
     </div>
+    <script>
+function toggleCard(card) { card.classList.toggle('open'); }
+function toggleAll(open) {
+    document.querySelectorAll('[data-fold="section"]').forEach(c => {
+        if (open) c.classList.add('open'); else c.classList.remove('open');
+    });
+}
+</script>
 </body>
 </html>
