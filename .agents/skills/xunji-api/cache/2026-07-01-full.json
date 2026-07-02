@@ -1,0 +1,28 @@
+{
+  "res": {
+    "schema": "train_open_api_v2",
+    "schema_version": "train_open_api_v2",
+    "version": 2,
+    "mode": "full",
+    "includeFullData": true,
+    "include_full_data": true,
+    "datestr": "2026-07-01",
+    "movementCatalogUrl": "/api_movement_catalog_for_llm_v2",
+    "movement_catalog_url": "/api_movement_catalog_for_llm_v2",
+    "limits": {
+      "maxTrainsPerDay": 4,
+      "maxMovesPerTrain": 40,
+      "maxSetsPerMove": 60,
+      "maxWriteMovesPerTrain": 15,
+      "maxWriteSetsPerMove": 20,
+      "maxPayloadBytes": 131072,
+      "maxResponseBytes": 196608,
+      "readRateLimitSeconds": 30,
+      "readRateLimitSecondsLight": 15,
+      "readRateLimitSecondsFull": 30,
+      "writeRateLimitSeconds": 45
+    },
+    "truncated": false,
+    "trains": []
+  }
+}
