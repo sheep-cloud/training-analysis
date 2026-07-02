@@ -15,7 +15,21 @@ Write-Host ""
 
 # 1. 运行 Python 脚本（脚本内部会自动同步高驰数据并刷新 token）
 Write-Host "⏳ 正在运行脚本..." -ForegroundColor Cyan
-py scripts/generate_report.py --date $Date
+
+# 兼容不同环境：优先使用 py，其次 python/python3
+$pythonCmd = $null
+foreach ($cmd in @("py", "python", "python3")) {
+    if (Get-Command $cmd -ErrorAction SilentlyContinue) {
+        $pythonCmd = $cmd
+        break
+    }
+}
+if (-not $pythonCmd) {
+    Write-Host "❌ 找不到可用的 Python 命令（py/python/python3）" -ForegroundColor Red
+    exit 1
+}
+
+& $pythonCmd scripts/generate_report.py --date $Date
 
 # 3. 提交到 GitHub
 Write-Host ""
