@@ -1,4 +1,4 @@
-# PowerShell 每日训练报告生成脚本
+﻿# PowerShell 每日训练报告生成脚本
 # 用法: .\run_daily.ps1 [日期]
 #      .\run_daily.ps1 2026-06-30
 #      .\run_daily.ps1  # 默认使用今天
@@ -33,7 +33,7 @@ if (Test-Path $AnalysisFile) {
 
 $stagedFiles = git diff --cached --name-only
 if (-not $stagedFiles) {
-    Write-Host "ℹ️  没有新的文件需要提交" -ForegroundColor Yellow
+    Write-Host "[i] 没有新的文件需要提交" -ForegroundColor Yellow
 }
 else {
     git commit -m "chore(训练报告): $Date"
