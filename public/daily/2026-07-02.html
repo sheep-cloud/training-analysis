@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>训练分析报告 - 2026-07-02</title>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #0d0d0d;
+    color: #f5f5f7;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+.container { max-width: 900px; margin: 0 auto; }
+.header { text-align: center; margin-bottom: 32px; }
+.header .date { color: #8e8e93; font-size: 14px; margin-bottom: 6px; }
+.header h1 { font-size: 32px; font-weight: 700; letter-spacing: 1px; }
+.header .subtitle { color: #00d4aa; font-size: 16px; margin-top: 8px; }
+
+.global-toggle { text-align: center; margin-bottom: 24px; }
+.global-toggle button {
+    background: #1c1c1e; color: #00d4aa; border: 1px solid #00d4aa;
+    padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 14px; margin: 0 6px;
+}
+.global-toggle button:hover { background: #232326; }
+
+.overview-card { background: #1c1c1e; border-radius: 20px; padding: 28px; margin-bottom: 24px; }
+.overview-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.overview-title { font-size: 20px; font-weight: 600; }
+.ring-wrap { position: relative; width: 110px; height: 110px; }
+.ring-bg, .ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; }
+.ring-bg { stroke: #2c2c2e; }
+.ring-fill { stroke: #00d4aa; stroke-dasharray: 259 345; }
+.ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+.ring-text .num { font-size: 26px; font-weight: 700; }
+.ring-text .label { font-size: 12px; color: #8e8e93; }
+.overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.overview-item { text-align: center; }
+.overview-item .value { font-size: 26px; font-weight: 700; color: #fff; }
+.overview-item .label { font-size: 12px; color: #8e8e93; margin-top: 4px; }
+
+.section { margin-bottom: 16px; }
+.fold-card { background: #1c1c1e; border-radius: 16px; overflow: hidden; }
+.fold-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 20px; cursor: pointer; user-select: none;
+}
+.fold-header:hover { background: #232326; }
+.fold-title { display: flex; align-items: center; gap: 10px; }
+.fold-title .icon-emoji { font-size: 22px; }
+.fold-title .text { font-size: 18px; font-weight: 700; }
+.fold-title .badge {
+    background: #2c2c2e; color: #8e8e93; font-size: 12px;
+    padding: 3px 10px; border-radius: 12px; margin-left: 8px;
+}
+.fold-arrow { font-size: 14px; color: #8e8e93; transition: transform 0.2s; }
+.fold-card.open .fold-arrow { transform: rotate(180deg); }
+.fold-body { display: none; padding: 0 20px 20px; }
+.fold-card.open .fold-body { display: block; }
+
+.card { background: #1c1c1e; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+.detail-row { font-size: 12px; color: #8e8e93; margin-top: 6px; display: flex; gap: 16px; flex-wrap: wrap; }
+.detail-row span { color: #f5f5f7; }
+
+.strength-summary { display: flex; gap: 24px; font-size: 13px; color: #8e8e93; margin-bottom: 16px; flex-wrap: wrap; }
+.strength-summary span { color: #00d4aa; font-weight: 600; }
+.movement { display: flex; align-items: flex-start; gap: 14px; padding: 16px 0; border-bottom: 1px solid #2c2c2e; }
+.movement:last-child { border-bottom: none; padding-bottom: 0; }
+.movement:first-child { padding-top: 0; }
+.movement-num { width: 36px; height: 36px; border-radius: 50%; background: #2c2c2e; color: #00d4aa; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.movement-info { flex: 1; }
+.movement-name { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+.sets-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.set-tag { background: #2c2c2e; padding: 8px 12px; border-radius: 10px; font-size: 13px; color: #f5f5f7; }
+.set-tag .main { font-weight: 600; }
+.set-tag .type { color: #ff9f0a; font-size: 11px; margin-right: 4px; }
+.set-tag .rest { color: #8e8e93; font-size: 11px; margin-left: 4px; }
+.set-tag .extra { color: #8e8e93; font-size: 11px; margin-left: 4px; }
+.mov-detail { color: #8e8e93; font-size: 12px; margin-top: 8px; }
+.mov-detail span { color: #f5f5f7; }
+
+.activity-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 14px; }
+.activity-grid .item .num { font-size: 22px; font-weight: 700; }
+.activity-grid .item .label { font-size: 12px; color: #8e8e93; margin-top: 2px; }
+
+.metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.metric-card { background: #1c1c1e; border-radius: 16px; padding: 18px; }
+.metric-card .label { font-size: 12px; color: #8e8e93; margin-bottom: 8px; }
+.metric-card .value { font-size: 24px; font-weight: 700; }
+.metric-card .unit { font-size: 12px; color: #8e8e93; margin-left: 2px; }
+.metric-card .sub { font-size: 11px; color: #8e8e93; margin-top: 6px; }
+
+.sleep-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.sleep-time { font-size: 32px; font-weight: 700; }
+.sleep-quality { background: #2c2c2e; padding: 6px 14px; border-radius: 20px; font-size: 14px; color: #00d4aa; }
+.sleep-bar { height: 14px; border-radius: 7px; background: #2c2c2e; overflow: hidden; display: flex; margin-bottom: 14px; }
+.sleep-bar span { height: 100%; }
+.deep { background: #0a84ff; }
+.light { background: #64d2ff; }
+.rem { background: #bf5af2; }
+.awake { background: #ff9f0a; }
+.sleep-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.sleep-hr { color: #8e8e93; font-size: 13px; margin-top: 16px; }
+
+.analysis-card { background: #161618; border-radius: 14px; padding: 18px; margin-bottom: 12px; }
+.analysis-card h3 { font-size: 15px; color: #00d4aa; margin-bottom: 10px; }
+.analysis-card ul { list-style: none; }
+.analysis-card li { padding: 5px 0; font-size: 13px; line-height: 1.6; color: #d1d1d6; border-bottom: 1px solid #2c2c2e; }
+.analysis-card li:last-child { border-bottom: none; }
+.analysis-card .highlight { color: #fff; font-weight: 600; }
+.analysis-card .warn { color: #ff9f0a; }
+.analysis-card .good { color: #00d4aa; }
+
+.score-card { display: flex; align-items: center; justify-content: space-between; background: #1c1c1e; border-radius: 20px; padding: 28px; margin-bottom: 24px; }
+.score-left { flex: 1; }
+.score-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.score-desc { color: #8e8e93; font-size: 13px; }
+.score-right { text-align: right; }
+.score-value { font-size: 48px; font-weight: 700; line-height: 1; }
+.score-value.good { color: #00d4aa; }
+.score-value.warn { color: #ff9f0a; }
+.score-value.danger { color: #ff453a; }
+.score-value.neutral { color: #0a84ff; }
+.readiness-badge { display: inline-block; margin-top: 10px; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+.readiness-badge.good { background: rgba(0, 212, 170, 0.15); color: #00d4aa; }
+.readiness-badge.warn { background: rgba(255, 159, 10, 0.15); color: #ff9f0a; }
+.readiness-badge.danger { background: rgba(255, 69, 58, 0.15); color: #ff453a; }
+.readiness-badge.neutral { background: rgba(10, 132, 255, 0.15); color: #0a84ff; }
+.metric-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+.metric-row .metric { background: #2c2c2e; padding: 8px 12px; border-radius: 10px; font-size: 13px; }
+.metric-row .metric .label { color: #8e8e93; margin-right: 6px; }
+.metric-row .metric .value { color: #f5f5f7; font-weight: 600; }
+.trend-up { color: #00d4aa; }
+.trend-down { color: #ff453a; }
+.trend-flat { color: #8e8e93; }
+
+.footer { text-align: center; color: #8e8e93; font-size: 12px; margin-top: 40px; }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="date">2026-07-02 周四</div>
+            <h1>训练分析报告</h1>
+            <div class="subtitle">今天有 2 练</div>
+        </div>
+
+        <div class="global-toggle">
+            <button onclick="toggleAll(true)">全部展开</button>
+            <button onclick="toggleAll(false)">全部折叠</button>
+        </div>
+
+        <div class="overview-card">
+            <div class="overview-top">
+                <div>
+                    <div class="overview-title">今日训练负荷</div>
+                    <div style="color:#8e8e93;font-size:13px;margin-top:8px">力量 + 有氧综合</div>
+                </div>
+                <div class="ring-wrap">
+                    <svg width="110" height="110" viewBox="0 0 120 120">
+                        <circle class="ring-bg" cx="60" cy="60" r="50" transform="rotate(135 60 60)"></circle>
+                        <circle class="ring-fill" cx="60" cy="60" r="50" transform="rotate(135 60 60)"></circle>
+                    </svg>
+                    <div class="ring-text">
+                        <div class="num">51</div>
+                        <div class="label">负荷</div>
+                    </div>
+                </div>
+            </div>
+            <div class="overview-grid">
+                <div class="overview-item"><div class="value">2</div><div class="label">训练场次</div></div>
+                <div class="overview-item"><div class="value">00:28:00</div><div class="label">训练时长</div></div>
+                <div class="overview-item"><div class="value">246</div><div class="label">消耗热量(千卡)</div></div>
+                <div class="overview-item"><div class="value">0</div><div class="label">力量负荷</div></div>
+            </div>
+        </div>
+
+        
+    <div class="section fold-card open" data-fold="section">
+        <div class="fold-header" onclick="toggleCard(this.parentElement)">
+            <div class="fold-title">
+                <span class="icon-emoji">💪</span>
+                <span class="text">力量训练</span>
+                <span class="badge">1 场训练 · 27 组</span>
+            </div>
+            <div class="fold-arrow">▼</div>
+        </div>
+        <div class="fold-body">
+        <div class="fold-card open" style="margin-bottom:14px" data-fold="inner">
+            <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                <div class="fold-title">
+                    <span class="text" style="font-size:16px">臀腿</span>
+                    <span class="badge">62分钟 · 27组 · 24844kg</span>
+                </div>
+                <div class="fold-arrow">▼</div>
+            </div>
+            <div class="fold-body">
+                <div class="detail-row" style="margin-bottom:12px">
+                    开始 <span>12:10</span> &nbsp;·&nbsp; 结束 <span>13:12</span>
+                </div>
+                <div class="strength-summary">总重量 <span>24844 kg</span> &nbsp;·&nbsp; </div>
+                
+            <div class="movement">
+                <div class="movement-num">1</div>
+                <div class="movement-info">
+                    <div class="movement-name">史密斯机深蹲</div>
+                    <div class="sets-row"><div class="set-tag"><span class="type">热</span><span class="main">20kg×15</span><span class="extra">左80</span><span class="rest">休120s</span></div><div class="set-tag"><span class="type">热</span><span class="main">40kg×12</span><span class="extra">左70</span><span class="rest">休120s</span></div><div class="set-tag"><span class="type">热</span><span class="main">60kg×10</span><span class="extra">左100</span><span class="rest">休120s</span></div><div class="set-tag"><span class="main">85kg×8</span><span class="extra">左85</span><span class="rest">休120s</span></div><div class="set-tag"><span class="main">85kg×8</span><span class="extra">左85</span><span class="rest">休120s</span></div><div class="set-tag"><span class="main">87.5kg×8</span><span class="extra">左87.5</span><span class="rest">休120s</span></div><div class="set-tag"><span class="main">87.5kg×8</span><span class="extra">左87.5</span><span class="rest">休120s</span></div></div>
+                    <div class="mov-detail">容量 <span>4140 kg</span> &nbsp;·&nbsp; 最大重量 <span>88 kg</span></div>
+                </div>
+            </div>
+            <div class="movement">
+                <div class="movement-num">2</div>
+                <div class="movement-info">
+                    <div class="movement-name">器械倒蹬(版本2)</div>
+                    <div class="sets-row"><div class="set-tag"><span class="main">131.5kg×12</span><span class="extra">左131.5</span><span class="rest">休75s</span></div><div class="set-tag"><span class="main">131.5kg×12</span><span class="extra">左131.5</span><span class="rest">休75s</span></div><div class="set-tag"><span class="main">131.5kg×12</span><span class="extra">左131.5</span><span class="rest">休75s</span></div><div class="set-tag"><span class="main">131.5kg×12</span><span class="extra">左131.5</span><span class="rest">休75s</span></div></div>
+                    <div class="mov-detail">容量 <span>6312 kg</span> &nbsp;·&nbsp; 最大重量 <span>132 kg</span></div>
+                </div>
+            </div>
+            <div class="movement">
+                <div class="movement-num">3</div>
+                <div class="movement-info">
+                    <div class="movement-name">坐姿腿屈伸</div>
+                    <div class="sets-row"><div class="set-tag"><span class="main">68kg×12</span><span class="extra">左68</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">68kg×12</span><span class="extra">左68</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">68kg×12</span><span class="extra">左68</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">68kg×15</span><span class="extra">左68</span><span class="rest">休60s</span></div></div>
+                    <div class="mov-detail">容量 <span>3468 kg</span> &nbsp;·&nbsp; 最大重量 <span>68 kg</span></div>
+                </div>
+            </div>
+            <div class="movement">
+                <div class="movement-num">4</div>
+                <div class="movement-info">
+                    <div class="movement-name">坐姿腿弯举</div>
+                    <div class="sets-row"><div class="set-tag"><span class="main">86.2kg×15</span><span class="extra">左86.2</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">86.2kg×12</span><span class="extra">左86.2</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">86.2kg×12</span><span class="extra">左86.2</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">86.2kg×12</span><span class="extra">左86.2</span><span class="rest">休60s</span></div></div>
+                    <div class="mov-detail">容量 <span>4396 kg</span> &nbsp;·&nbsp; 最大重量 <span>86 kg</span></div>
+                </div>
+            </div>
+            <div class="movement">
+                <div class="movement-num">5</div>
+                <div class="movement-info">
+                    <div class="movement-name">坐姿髋外展</div>
+                    <div class="sets-row"><div class="set-tag"><span class="main">68kg×12</span><span class="extra">左68</span><span class="rest">休45s</span></div><div class="set-tag"><span class="main">68kg×12</span><span class="extra">左68</span><span class="rest">休45s</span></div><div class="set-tag"><span class="main">68kg×12</span><span class="extra">左68</span><span class="rest">休45s</span></div><div class="set-tag"><span class="main">68kg×12</span><span class="extra">左68</span><span class="rest">休45s</span></div></div>
+                    <div class="mov-detail">容量 <span>3264 kg</span> &nbsp;·&nbsp; 最大重量 <span>68 kg</span></div>
+                </div>
+            </div>
+            <div class="movement">
+                <div class="movement-num">6</div>
+                <div class="movement-info">
+                    <div class="movement-name">坐姿髋内收</div>
+                    <div class="sets-row"><div class="set-tag"><span class="main">68kg×12</span><span class="extra">左68</span><span class="rest">休45s</span></div><div class="set-tag"><span class="main">68kg×12</span><span class="extra">左68</span><span class="rest">休45s</span></div><div class="set-tag"><span class="main">68kg×12</span><span class="extra">左68</span><span class="rest">休45s</span></div><div class="set-tag"><span class="main">68kg×12</span><span class="extra">左68</span><span class="rest">休45s</span></div></div>
+                    <div class="mov-detail">容量 <span>3264 kg</span> &nbsp;·&nbsp; 最大重量 <span>68 kg</span></div>
+                </div>
+            </div>
+            </div>
+        </div></div>
+    </div>
+        
+    <div class="score-card">
+        <div class="score-left">
+            <div class="score-title">恢复评分</div>
+            <div class="score-desc">基于 HRV、静息心率、睡眠、疲劳度与负荷比综合计算</div>
+            <div class="metric-row"><div class="metric"><span class="label">HRV:</span><span class="value">93.0/67.0</span></div><div class="metric"><span class="label">RHR:</span><span class="value">45 bpm</span></div><div class="metric"><span class="label">睡眠:</span><span class="value">5 小时 45 分</span></div><div class="metric"><span class="label">疲劳:</span><span class="value">-3.0%</span></div></div>
+        </div>
+        <div class="score-right">
+            <div class="score-value good">90</div>
+            <div class="readiness-badge good">适宜高强度</div>
+        </div>
+    </div>
+        
+        <div class="section fold-card open" data-fold="section">
+            <div class="fold-header" onclick="toggleCard(this.parentElement)">
+                <div class="fold-title">
+                    <span class="icon-emoji">🏃</span>
+                    <span class="text">跑步</span>
+                    <span class="badge">1 场 · 00:28:00 · 246千卡</span>
+                </div>
+                <div class="fold-arrow">▼</div>
+            </div>
+            <div class="fold-body">
+            <div class="card">
+                <div style="font-size:18px;font-weight:700;margin-bottom:8px">轻松跑</div>
+                <div class="detail-row" style="margin-bottom:12px">
+                    运动类型 <span>跑步 (101)</span> &nbsp;·&nbsp; 训练负荷 <span>51</span>
+                </div>
+                <div class="activity-grid">
+                    <div class="item"><div class="num">5.04</div><div class="label">距离 km</div></div>
+                    <div class="item"><div class="num">00:28:00</div><div class="label">时长</div></div>
+                    <div class="item"><div class="num">5:35</div><div class="label">平均配速 min/km</div></div>
+                    <div class="item"><div class="num">142 bpm</div><div class="label">平均心率</div></div>
+                    <div class="item"><div class="num">246</div><div class="label">消耗 kcal</div></div>
+                </div>
+            </div></div>
+        </div>
+        
+    <div class="section fold-card open" data-fold="section">
+        <div class="fold-header" onclick="toggleCard(this.parentElement)">
+            <div class="fold-title">
+                <span class="icon-emoji">❤️</span>
+                <span class="text">生理指标</span>
+                <span class="badge">11 项数据</span>
+            </div>
+            <div class="fold-arrow">▼</div>
+        </div>
+        <div class="fold-body">
+            <div class="metric-grid">
+        <div class="metric-card">
+            <div class="label">HRV</div>
+            <div class="value">93.0<span class="unit">ms</span></div>
+            <div class="sub">基线 67.0ms</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">静息心率</div>
+            <div class="value">45<span class="unit">bpm</span></div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">训练负荷</div>
+            <div class="value">51</div>
+            <div class="sub">负荷比 0.97</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">最大摄氧量</div>
+            <div class="value">56</div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">体能水平</div>
+            <div class="value">86.7</div>
+            <div class="sub">7日 101.0</div>
+        </div>
+        <div class="metric-card">
+            <div class="label">疲劳度</div>
+            <div class="value">-3.0<span class="unit">%</span></div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">有氧能力 ATI</div>
+            <div class="value">99.0</div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">无氧能力 CTI</div>
+            <div class="value">102.0</div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">乳酸阈值心率</div>
+            <div class="value">167<span class="unit">bpm</span></div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">乳酸阈值配速</div>
+            <div class="value">262</div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">表现指数</div>
+            <div class="value">2</div>
+            
+        </div>
+        <div class="metric-card">
+            <div class="label">HRV 区间</div>
+            <div class="value" style="font-size:14px">5-47-57-77</div>
+        </div></div>
+        </div>
+    </div>
+        
+    <div class="section fold-card open" data-fold="section">
+        <div class="fold-header" onclick="toggleCard(this.parentElement)">
+            <div class="fold-title">
+                <span class="icon-emoji">🌙</span>
+                <span class="text">睡眠</span>
+                <span class="badge">5 小时 45 分</span>
+            </div>
+            <div class="fold-arrow">▼</div>
+        </div>
+        <div class="fold-body">
+            <div class="sleep-top">
+                <div class="sleep-time">5 小时 45 分</div>
+                <div class="sleep-quality">睡眠偏短</div>
+            </div>
+            <div class="sleep-bar">
+                <span class="deep" style="width:18.7%"></span>
+                <span class="light" style="width:65.7%"></span>
+                <span class="rem" style="width:13.3%"></span>
+                <span class="awake" style="width:2.3%"></span>
+            </div>
+            <div class="sleep-legend">
+                <div class="legend-item"><div class="legend-dot deep"></div>深睡 66分</div>
+                <div class="legend-item"><div class="legend-dot light"></div>浅睡 232分</div>
+                <div class="legend-item"><div class="legend-dot rem"></div>REM 47分</div>
+                <div class="legend-item"><div class="legend-dot awake"></div>清醒 8分</div>
+            </div>
+            <div class="sleep-hr">睡眠心率 40-63 bpm，平均 46 bpm</div>
+        </div>
+    </div>
+        
+    <div class="section fold-card open" data-fold="section">
+        <div class="fold-header" onclick="toggleCard(this.parentElement)">
+            <div class="fold-title">
+                <span class="icon-emoji">📊</span>
+                <span class="text">数据分析</span>
+                <span class="badge">6 项分析</span>
+            </div>
+            <div class="fold-arrow">▼</div>
+        </div>
+        <div class="fold-body">
+        <div class="analysis-card">
+            <h3>恢复状态</h3>
+            <ul><li>综合恢复评分 <span class='highlight'>90</span>，今日训练建议：<span class='good'>适宜高强度</span>。</li></ul>
+        </div>
+        <div class="analysis-card">
+            <h3>力量训练分析</h3>
+            <ul><li>今日<span class='highlight'>臀腿</span>训练共 <span class='highlight'>6 个动作 27 组</span>，总容量约 <span class='highlight'>24.8 吨</span>，训练时长 01:02:00。</li><li>总容量 24.8 吨，较 14 日单日均值 13.2 吨 <span class='trend-up'>↑89%</span>。</li><li><span class='highlight'>史密斯机深蹲</span>最大重量 <span class='highlight'>88kg</span>，可根据状态尝试渐进超负荷。</li><li><span class='highlight'>器械倒蹬(版本2)</span>稳定在 <span class='highlight'>132kg</span> 做组，力量维持良好。</li><li><span class='highlight'>坐姿腿屈伸</span>稳定在 <span class='highlight'>68kg</span> 做组，力量维持良好。</li><li><span class='highlight'>坐姿腿弯举</span>稳定在 <span class='highlight'>86kg</span> 做组，力量维持良好。</li><li><span class='highlight'>坐姿髋外展</span>稳定在 <span class='highlight'>68kg</span> 做组，力量维持良好。</li><li><span class='highlight'>坐姿髋内收</span>稳定在 <span class='highlight'>68kg</span> 做组，力量维持良好。</li><li>本次训练性质判断为：<span class='highlight'>高强度综合训练</span>。</li><li>整体训练强度适中，建议关键动作逐步增加 2.5-5kg 或 1-2 次重复。</li></ul>
+        </div>
+        <div class="analysis-card">
+            <h3>跑步分析</h3>
+            <ul><li>今日跑步共 <span class='highlight'>1 场</span>，总距离 <span class='highlight'>5.04 km</span>，总时长 <span class='highlight'>00:28:00</span>，消耗 <span class='highlight'>246 千卡</span>。</li><li>跑步总时长较 14 日同类型日均 40 分钟 <span class='trend-down'>↓30%</span>。</li><li>轻松跑 平均心率 142 bpm，处于有氧进阶区（M区）；平均配速 5:35。</li><li>配速与近期同类型平均相当，状态稳定。</li></ul>
+        </div>
+        <div class="analysis-card">
+            <h3>生理指标分析</h3>
+            <ul><li>HRV 为 <span class='highlight'>93.0 ms</span>，接近或高于基线，恢复状态良好。<span class='trend-up'>↑44%</span></li><li>静息心率 <span class='highlight'>45 bpm</span>，较低，心肺基础较好。<span class='trend-up'>↓7%</span></li><li>训练负荷 51，负荷比 0.97，处于<span class='highlight'>维持区间</span>。</li><li>疲劳度 -3.0%，体能水平 86.7，整体处于可训练状态，需结合睡眠判断恢复质量。</li><li>最大摄氧量 <span class='highlight'>56</span>，可作为有氧能力长期跟踪指标。</li><li>有氧能力 ATI 99.0，无氧能力 CTI 102.0。</li></ul>
+        </div>
+        <div class="analysis-card">
+            <h3>睡眠分析</h3>
+            <ul><li>睡眠总时长 <span class='warn'>5 小时 45 分</span>，明显偏短，可能影响恢复。</li><li>睡眠时长较 14 日均值 338 分钟 <span class='trend-flat'>↑2%</span>，注意调整作息。</li><li>深睡占比约 <span class='highlight'>19%</span>，比例正常；清醒占比 2%。</li><li>睡眠平均心率 46 bpm，夜间心率平稳。</li><li>建议根据睡眠情况调整今日训练强度，睡眠不足时避免高强度训练。</li></ul>
+        </div>
+        <div class="analysis-card">
+            <h3>恢复建议</h3>
+            <ul><li>今日综合负荷 51，较 14 日均值 78 <span class='trend-down'>↓35%</span>。</li><li>睡眠不足，明天如训练建议选择低强度有氧或技术练习，避免大重量力量训练。</li></ul>
+        </div></div>
+    </div>
+
+        <div class="footer">
+            <p>数据来源: 训记 App + 高驰 App · 生成时间: 2026-07-02 15:50:36</p>
+        </div>
+    </div>
+    <script>
+function toggleCard(card) { card.classList.toggle('open'); }
+function toggleAll(open) {
+    document.querySelectorAll('[data-fold="section"]').forEach(c => {
+        if (open) c.classList.add('open'); else c.classList.remove('open');
+    });
+}
+</script>
+</body>
+</html>
