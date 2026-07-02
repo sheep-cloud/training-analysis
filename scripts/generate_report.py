@@ -62,27 +62,105 @@ SPORT_TYPE_CATEGORIES = {
 }
 
 
+def _is_auth_failure(error):
+    """Return True if *error* indicates the access token is invalid/revoked.
+
+    Coros API uses result code 1019 for invalid tokens. The code is preferred
+    when the error object exposes it; otherwise fall back to the message text
+    so we still react if the error was stringified upstream.
+    """
+    code = getattr(error, "code", None)
+    if code in ("1019", 1019):
+        return True
+    message = str(error).lower()
+    return "access token is invalid" in message or "token" in message and "invalid" in message
+
+
+def _coros_login_with_fallback(email, password, region):
+    """Authenticate against Coros, requesting mobile token only when needed.
+
+    Mobile login involves APK reverse-engineered AES encryption and is slower,
+    so we first try a plain web login (skip_mobile=True). If that succeeds but
+    leaves no mobile token in the stored auth, we then perform mobile login to
+    keep sleep data working.
+    """
+    import asyncio
+    from coros_mcp.coros_api import login
+
+    auth = asyncio.run(login(email, password, region, skip_mobile=True))
+    if auth.mobile_access_token:
+        return auth
+    try:
+        mobile_auth = asyncio.run(login(email, password, region, skip_mobile=False))
+    except Exception as exc:
+        # Mobile login is best-effort; keep the web token so non-sleep data still works.
+        print(f"[INFO] Coros mobile login skipped: {exc}")
+        return auth
+    # Preserve web token while merging mobile fields.
+    auth.mobile_access_token = mobile_auth.mobile_access_token
+    auth.mobile_login_payload = mobile_auth.mobile_login_payload
+    return auth
+
+
 def ensure_coros_sync(date_str):
-    """Auto-login (if needed) and sync Coros data for date_str into the local cache."""
+    """Auto-login (if needed) and sync Coros data for date_str into the local cache.
+
+    If the server reports the access token is invalid, clear the stored token and
+    re-authenticate once using credentials from .env.
+    """
     try:
         import asyncio
-        from coros_mcp.coros_api import get_stored_auth, login, get_env_credentials
+        from coros_mcp.coros_api import get_stored_auth, get_env_credentials
         from coros_mcp.cache.sync import sync_all
+        from coros_mcp.auth.storage import clear_token
 
-        auth = get_stored_auth()
-        if auth is None:
+        # Defensive import: upstream layout may change.
+        try:
+            from coros_mcp.coros_api import CorosAPIError
+        except Exception:
+            CorosAPIError = Exception
+
+        def _obtain_auth():
+            auth = get_stored_auth()
+            if auth is not None:
+                return auth
             creds = get_env_credentials()
             if creds is None:
-                print("[WARN] Coros not authenticated and no credentials in .env")
-                return
+                return None
             email, password, region = creds
-            auth = asyncio.run(login(email, password, region, skip_mobile=False))
+            return _coros_login_with_fallback(email, password, region)
+
+        auth = _obtain_auth()
+        if auth is None:
+            print("[WARN] Coros not authenticated and no credentials in .env")
+            return
 
         day = date_str.replace("-", "")
         # Sync previous day as well; late-night activities may be stored under the previous date.
         prev_day = (datetime.strptime(date_str, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y%m%d")
 
-        stats = asyncio.run(sync_all(auth, prev_day, end_day=day))
+        def _sync_once(a):
+            return asyncio.run(sync_all(a, prev_day, end_day=day))
+
+        stats = _sync_once(auth)
+
+        # Server-side token revocation: re-login once and retry.
+        if any(_is_auth_failure(e) for e in stats.get("errors", [])):
+            print("[INFO] Coros access token invalid, clearing token and re-authenticating...")
+            clear_token()
+            creds = get_env_credentials()
+            if creds is None:
+                print("[WARN] Coros token invalid but no credentials in .env; cannot re-authenticate")
+                return
+            email, password, region = creds
+            try:
+                auth = _coros_login_with_fallback(email, password, region)
+            except CorosAPIError as e:
+                code = getattr(e, "code", "unknown")
+                print(f"[WARN] Coros re-authentication failed (code={code}): {e}")
+                return
+            stats = _sync_once(auth)
+
         print(f"[INFO] Coros synced: daily={stats['daily']}, sleep={stats['sleep']}, activities={stats['activities']}")
         for e in stats.get("errors", []):
             print(f"[WARN] Coros sync error: {e}")

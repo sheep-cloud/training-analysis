@@ -6,8 +6,8 @@
       "start_time": 1782965446438,
       "end_time": 1782969167799,
       "duration_minutes": 62,
-      "calories": null,
-      "training_load": null,
+      "calories": 286.1,
+      "training_load": 10,
       "movements": [
         {
           "name": "史密斯机深蹲",
@@ -388,11 +388,11 @@
       77
     ],
     "rhr": 45,
-    "training_load": 51,
+    "training_load": 61,
     "training_load_ratio": 0.97,
     "tired_rate": -3.0,
-    "ati": 99.0,
-    "cti": 102.0,
+    "ati": 100.0,
+    "cti": 103.0,
     "performance": 2,
     "distance": 0.0,
     "duration": 0,
@@ -418,8 +418,8 @@
     "quality_score": null
   },
   "summary": {
-    "total_load": 51,
-    "total_calories": 245.9,
+    "total_load": 61,
+    "total_calories": 532.0,
     "total_duration": 28,
     "workout_count": 2
   }
