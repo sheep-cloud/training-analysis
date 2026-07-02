@@ -7,6 +7,7 @@ param(
     [string]$Date = (Get-Date -Format "yyyy-MM-dd")
 )
 
+Set-Location $PSScriptRoot
 $ErrorActionPreference = "Stop"
 
 Write-Host "🚀 开始生成 $Date 的训练报告..." -ForegroundColor Green
