@@ -15,7 +15,21 @@ echo ""
 
 # 1. 运行 Python 脚本（脚本内部会自动同步高驰数据并刷新 token）
 echo "⏳ 正在运行脚本..."
-py scripts/generate_report.py --date "$DATE"
+
+# 兼容不同环境：优先使用 python3，其次 python/py
+python_cmd=""
+for cmd in python3 python py; do
+    if command -v "$cmd" >/dev/null 2>&1; then
+        python_cmd=$cmd
+        break
+    fi
+done
+if [ -z "$python_cmd" ]; then
+    echo "❌ 找不到可用的 Python 命令（python3/python/py）"
+    exit 1
+fi
+
+$python_cmd scripts/generate_report.py --date "$DATE"
 
 # 3. 提交到 GitHub
 echo ""
