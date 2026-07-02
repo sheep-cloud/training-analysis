@@ -115,6 +115,29 @@ body {
 .analysis-card .warn { color: #ff9f0a; }
 .analysis-card .good { color: #00d4aa; }
 
+.score-card { display: flex; align-items: center; justify-content: space-between; background: #1c1c1e; border-radius: 20px; padding: 28px; margin-bottom: 24px; }
+.score-left { flex: 1; }
+.score-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.score-desc { color: #8e8e93; font-size: 13px; }
+.score-right { text-align: right; }
+.score-value { font-size: 48px; font-weight: 700; line-height: 1; }
+.score-value.good { color: #00d4aa; }
+.score-value.warn { color: #ff9f0a; }
+.score-value.danger { color: #ff453a; }
+.score-value.neutral { color: #0a84ff; }
+.readiness-badge { display: inline-block; margin-top: 10px; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+.readiness-badge.good { background: rgba(0, 212, 170, 0.15); color: #00d4aa; }
+.readiness-badge.warn { background: rgba(255, 159, 10, 0.15); color: #ff9f0a; }
+.readiness-badge.danger { background: rgba(255, 69, 58, 0.15); color: #ff453a; }
+.readiness-badge.neutral { background: rgba(10, 132, 255, 0.15); color: #0a84ff; }
+.metric-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+.metric-row .metric { background: #2c2c2e; padding: 8px 12px; border-radius: 10px; font-size: 13px; }
+.metric-row .metric .label { color: #8e8e93; margin-right: 6px; }
+.metric-row .metric .value { color: #f5f5f7; font-weight: 600; }
+.trend-up { color: #00d4aa; }
+.trend-down { color: #ff453a; }
+.trend-flat { color: #8e8e93; }
+
 .footer { text-align: center; color: #8e8e93; font-size: 12px; margin-top: 40px; }
 </style>
 </head>
@@ -150,7 +173,7 @@ body {
             </div>
             <div class="overview-grid">
                 <div class="overview-item"><div class="value">3</div><div class="label">训练场次</div></div>
-                <div class="overview-item"><div class="value">155</div><div class="label">有氧时长(分钟)</div></div>
+                <div class="overview-item"><div class="value">02:35:00</div><div class="label">训练时长</div></div>
                 <div class="overview-item"><div class="value">1329</div><div class="label">消耗热量(千卡)</div></div>
                 <div class="overview-item"><div class="value">9</div><div class="label">力量负荷</div></div>
             </div>
@@ -171,7 +194,7 @@ body {
             <div class="fold-header" onclick="toggleCard(this.parentElement)">
                 <div class="fold-title">
                     <span class="text" style="font-size:16px">背部</span>
-                    <span class="badge">58分钟 · 23组 · 0kg</span>
+                    <span class="badge">58分钟 · 23组 · 11934kg</span>
                 </div>
                 <div class="fold-arrow">▼</div>
             </div>
@@ -179,14 +202,14 @@ body {
                 <div class="detail-row" style="margin-bottom:12px">
                     开始 <span>12:05</span> &nbsp;·&nbsp; 结束 <span>13:03</span>
                 </div>
-                <div class="strength-summary">总重量 <span>0 kg</span> &nbsp;·&nbsp; 消耗 <span>269 千卡</span> &nbsp;·&nbsp; 负荷 <span>9</span></div>
+                <div class="strength-summary">总重量 <span>11934 kg</span> &nbsp;·&nbsp; 消耗 <span>269 千卡</span> &nbsp;·&nbsp; 负荷 <span>9</span></div>
                 
             <div class="movement">
                 <div class="movement-num">1</div>
                 <div class="movement-info">
                     <div class="movement-name">哑铃划船（手扶）</div>
                     <div class="sets-row"><div class="set-tag"><span class="type">热</span><span class="main">20kg×15</span><span class="extra">左60</span><span class="rest">休75s</span></div><div class="set-tag"><span class="type">热</span><span class="main">30kg×12</span><span class="extra">左60</span><span class="rest">休75s</span></div><div class="set-tag"><span class="type">热</span><span class="main">40kg×10</span><span class="extra">左60</span><span class="rest">休75s</span></div><div class="set-tag"><span class="main">50kg×10</span><span class="extra">左50</span><span class="rest">休75s</span></div><div class="set-tag"><span class="main">50kg×10</span><span class="extra">左50</span><span class="rest">休75s</span></div><div class="set-tag"><span class="main">50kg×10</span><span class="extra">左50</span><span class="rest">休75s</span></div><div class="set-tag"><span class="main">50kg×10</span><span class="extra">左50</span><span class="rest">休75s</span></div></div>
-                    <div class="mov-detail"></div>
+                    <div class="mov-detail">容量 <span>3060 kg</span> &nbsp;·&nbsp; 最大重量 <span>50 kg</span></div>
                 </div>
             </div>
             <div class="movement">
@@ -194,7 +217,7 @@ body {
                 <div class="movement-info">
                     <div class="movement-name">对握高位下拉</div>
                     <div class="sets-row"><div class="set-tag"><span class="main">59kg×12</span><span class="extra">左59</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">59kg×12</span><span class="extra">左59</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">59kg×12</span><span class="extra">左59</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">59kg×12</span><span class="extra">左59</span><span class="rest">休60s</span></div></div>
-                    <div class="mov-detail"></div>
+                    <div class="mov-detail">容量 <span>2832 kg</span> &nbsp;·&nbsp; 最大重量 <span>59 kg</span></div>
                 </div>
             </div>
             <div class="movement">
@@ -202,7 +225,7 @@ body {
                 <div class="movement-info">
                     <div class="movement-name">窄握把手下拉</div>
                     <div class="sets-row"><div class="set-tag"><span class="main">63.5kg×12</span><span class="extra">左63.5</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">63.5kg×12</span><span class="extra">左63.5</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">68kg×12</span><span class="extra">左68</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">68kg×12</span><span class="extra">左68</span><span class="rest">休60s</span></div></div>
-                    <div class="mov-detail"></div>
+                    <div class="mov-detail">容量 <span>3156 kg</span> &nbsp;·&nbsp; 最大重量 <span>68 kg</span></div>
                 </div>
             </div>
             <div class="movement">
@@ -210,7 +233,7 @@ body {
                 <div class="movement-info">
                     <div class="movement-name">器械划船2</div>
                     <div class="sets-row"><div class="set-tag"><span class="main">63.5kg×12</span><span class="extra">左63.5</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">59kg×12</span><span class="extra">左59</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">59kg×12</span><span class="extra">左59</span><span class="rest">休60s</span></div><div class="set-tag"><span class="main">59kg×12</span><span class="extra">左59</span><span class="rest">休60s</span></div></div>
-                    <div class="mov-detail"></div>
+                    <div class="mov-detail">容量 <span>2886 kg</span> &nbsp;·&nbsp; 最大重量 <span>64 kg</span></div>
                 </div>
             </div>
             <div class="movement">
@@ -218,11 +241,23 @@ body {
                 <div class="movement-info">
                     <div class="movement-name">引体向上(负重)</div>
                     <div class="sets-row"><div class="set-tag"><span class="main">自重×15</span></div><div class="set-tag"><span class="main">自重×15</span></div><div class="set-tag"><span class="main">自重×15</span></div><div class="set-tag"><span class="main">自重×15</span></div></div>
-                    <div class="mov-detail"></div>
+                    <div class="mov-detail">总次数 <span>60.0 次</span></div>
                 </div>
             </div>
             </div>
         </div></div>
+    </div>
+        
+    <div class="score-card">
+        <div class="score-left">
+            <div class="score-title">恢复评分</div>
+            <div class="score-desc">基于 HRV、静息心率、睡眠、疲劳度与负荷比综合计算</div>
+            <div class="metric-row"><div class="metric"><span class="label">HRV:</span><span class="value">59.0/67.0</span></div><div class="metric"><span class="label">RHR:</span><span class="value">49 bpm</span></div><div class="metric"><span class="label">睡眠:</span><span class="value">4 小时 35 分</span></div><div class="metric"><span class="label">疲劳:</span><span class="value">9.0%</span></div></div>
+        </div>
+        <div class="score-right">
+            <div class="score-value neutral">70</div>
+            <div class="readiness-badge neutral">适宜中等强度</div>
+        </div>
     </div>
         
         <div class="section fold-card open" data-fold="section">
@@ -230,7 +265,7 @@ body {
                 <div class="fold-title">
                     <span class="icon-emoji">🥏</span>
                     <span class="text">飞盘</span>
-                    <span class="badge">1 场 · 109分钟 · 670千卡</span>
+                    <span class="badge">1 场 · 01:49:00 · 670千卡</span>
                 </div>
                 <div class="fold-arrow">▼</div>
             </div>
@@ -242,7 +277,7 @@ body {
                 </div>
                 <div class="activity-grid">
                     <div class="item"><div class="num">3.56</div><div class="label">距离 km</div></div>
-                    <div class="item"><div class="num">110</div><div class="label">时长 min</div></div>
+                    <div class="item"><div class="num">01:49:00</div><div class="label">时长</div></div>
                     <div class="item"><div class="num">30:47</div><div class="label">平均配速 min/km</div></div>
                     <div class="item"><div class="num">114 bpm</div><div class="label">平均心率</div></div>
                     <div class="item"><div class="num">670</div><div class="label">消耗 kcal</div></div>
@@ -254,7 +289,7 @@ body {
                 <div class="fold-title">
                     <span class="icon-emoji">🏃</span>
                     <span class="text">跑步</span>
-                    <span class="badge">1 场 · 46分钟 · 390千卡</span>
+                    <span class="badge">1 场 · 00:46:00 · 390千卡</span>
                 </div>
                 <div class="fold-arrow">▼</div>
             </div>
@@ -266,7 +301,7 @@ body {
                 </div>
                 <div class="activity-grid">
                     <div class="item"><div class="num">8.46</div><div class="label">距离 km</div></div>
-                    <div class="item"><div class="num">46</div><div class="label">时长 min</div></div>
+                    <div class="item"><div class="num">00:46:00</div><div class="label">时长</div></div>
                     <div class="item"><div class="num">5:28</div><div class="label">平均配速 min/km</div></div>
                     <div class="item"><div class="num">139 bpm</div><div class="label">平均心率</div></div>
                     <div class="item"><div class="num">390</div><div class="label">消耗 kcal</div></div>
@@ -382,35 +417,43 @@ body {
             <div class="fold-title">
                 <span class="icon-emoji">📊</span>
                 <span class="text">数据分析</span>
-                <span class="badge">5 项分析</span>
+                <span class="badge">7 项分析</span>
             </div>
             <div class="fold-arrow">▼</div>
         </div>
         <div class="fold-body">
         <div class="analysis-card">
+            <h3>恢复状态</h3>
+            <ul><li>综合恢复评分 <span class='highlight'>70</span>，今日训练建议：<span class='neutral'>适宜中等强度</span>。</li></ul>
+        </div>
+        <div class="analysis-card">
             <h3>力量训练分析</h3>
-            <ul><li>今日<span class='highlight'>背部</span>训练共 <span class='highlight'>5 个动作 23 组</span>，总容量约 <span class='highlight'>0.0 吨</span>，训练时长 58 分钟。</li><li>整体训练强度适中，建议关键动作逐步增加 2.5-5kg 或 1-2 次重复。</li></ul>
+            <ul><li>今日<span class='highlight'>背部</span>训练共 <span class='highlight'>5 个动作 23 组</span>，总容量约 <span class='highlight'>11.9 吨</span>，训练时长 00:58:00。</li><li>总容量 11.9 吨，较 14 日单日均值 13.8 吨 <span class='trend-down'>↓14%</span>。</li><li><span class='highlight'>哑铃划船（手扶）</span>最大重量 <span class='highlight'>50kg</span>，可根据状态尝试渐进超负荷。</li><li><span class='highlight'>对握高位下拉</span>稳定在 <span class='highlight'>59kg</span> 做组，力量维持良好。</li><li><span class='highlight'>窄握把手下拉</span>最大重量 <span class='highlight'>68kg</span>，可根据状态尝试渐进超负荷。</li><li><span class='highlight'>器械划船2</span>最大重量 <span class='highlight'>64kg</span>，可根据状态尝试渐进超负荷。</li><li>本次训练性质判断为：<span class='highlight'>高强度综合训练</span>。</li><li>整体训练强度适中，建议关键动作逐步增加 2.5-5kg 或 1-2 次重复。</li></ul>
         </div>
         <div class="analysis-card">
             <h3>飞盘分析</h3>
-            <ul><li>今日飞盘共 <span class='highlight'>1 场</span>，总距离 <span class='highlight'>3.56 km</span>，总时长 <span class='highlight'>110 分钟</span>，消耗 <span class='highlight'>670 千卡</span>。</li><li>广州市 飞盘 平均心率 114 bpm，属于低强度有氧；平均配速 30:47。</li></ul>
+            <ul><li>今日飞盘共 <span class='highlight'>1 场</span>，总距离 <span class='highlight'>3.56 km</span>，总时长 <span class='highlight'>01:49:00</span>，消耗 <span class='highlight'>670 千卡</span>。</li><li>广州市 飞盘 平均心率 114 bpm，属于低强度有氧；平均配速 30:47。</li></ul>
         </div>
         <div class="analysis-card">
             <h3>跑步分析</h3>
-            <ul><li>今日跑步共 <span class='highlight'>1 场</span>，总距离 <span class='highlight'>8.46 km</span>，总时长 <span class='highlight'>46 分钟</span>，消耗 <span class='highlight'>390 千卡</span>。</li><li>速度间歇 平均心率 139 bpm，属于中等强度有氧；平均配速 5:28。</li></ul>
+            <ul><li>今日跑步共 <span class='highlight'>1 场</span>，总距离 <span class='highlight'>8.46 km</span>，总时长 <span class='highlight'>00:46:00</span>，消耗 <span class='highlight'>390 千卡</span>。</li><li>跑步总时长较 14 日同类型日均 40 分钟 <span class='trend-up'>↑15%</span>。</li><li>速度间歇 平均心率 139 bpm，处于有氧基础区（E区）；平均配速 5:28。</li><li>配速与近期同类型平均相当，状态稳定。</li></ul>
         </div>
         <div class="analysis-card">
             <h3>生理指标分析</h3>
-            <ul><li>HRV 为 <span class='highlight'>59.0 ms</span>，低于基线 67.0 ms，提示恢复状态一般。</li><li>静息心率 <span class='highlight'>49 bpm</span>，较低，心肺基础较好。</li><li>训练负荷 166，负荷比 1.08，处于<span class='highlight'>维持区间</span>。</li><li>疲劳度 9.0%，体能水平 86.7，整体处于可训练状态，需结合睡眠判断恢复质量。</li></ul>
+            <ul><li>HRV 为 <span class='highlight'>59.0 ms</span>，低于基线 67.0 ms，提示恢复状态一般。<span class='trend-down'>↓12%</span></li><li>静息心率 <span class='highlight'>49 bpm</span>，较低，心肺基础较好。<span class='trend-flat'>↑4%</span></li><li>训练负荷 166，负荷比 1.08，处于<span class='highlight'>维持区间</span>。</li><li>疲劳度 9.0%，体能水平 86.7，整体处于可训练状态，需结合睡眠判断恢复质量。</li><li>最大摄氧量 <span class='highlight'>56</span>，可作为有氧能力长期跟踪指标。</li><li>有氧能力 ATI 113.0，无氧能力 CTI 104.0。</li></ul>
         </div>
         <div class="analysis-card">
             <h3>睡眠分析</h3>
-            <ul><li>睡眠总时长 <span class='warn'>4 小时 35 分</span>，明显偏短，可能影响恢复。</li><li>深睡占比约 <span class='highlight'>24%</span>，比例正常；清醒占比 17%。</li><li>睡眠平均心率 51 bpm，夜间心率平稳。</li><li>建议根据睡眠情况调整今日训练强度，睡眠不足时避免高强度训练。</li></ul>
+            <ul><li>睡眠总时长 <span class='warn'>4 小时 35 分</span>，明显偏短，可能影响恢复。</li><li>睡眠时长较 14 日均值 353 分钟 <span class='trend-down'>↓22%</span>，注意调整作息。</li><li>深睡占比约 <span class='highlight'>24%</span>，比例正常；清醒占比 17%。</li><li>睡眠平均心率 51 bpm，夜间心率平稳。</li><li>建议根据睡眠情况调整今日训练强度，睡眠不足时避免高强度训练。</li></ul>
+        </div>
+        <div class="analysis-card">
+            <h3>恢复建议</h3>
+            <ul><li>今日综合负荷 166，较 14 日均值 53 <span class='trend-up'>↑213%</span>。</li><li>睡眠不足，明天如训练建议选择低强度有氧或技术练习，避免大重量力量训练。</li></ul>
         </div></div>
     </div>
 
         <div class="footer">
-            <p>数据来源: 训记 App + 高驰 App · 生成时间: 2026-07-01 22:25:06</p>
+            <p>数据来源: 训记 App + 高驰 App · 生成时间: 2026-07-02 18:52:58</p>
         </div>
     </div>
     <script>
