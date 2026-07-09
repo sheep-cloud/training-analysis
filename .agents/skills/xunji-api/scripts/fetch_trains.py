@@ -174,6 +174,11 @@ def cache_file(datestr: str, full: bool) -> Path:
     return cache_dir() / f"{datestr}{suffix}.json"
 
 
+def has_success_result(result: dict) -> bool:
+    """接口成功返回可能只有 res，不一定有 success 字段。"""
+    return bool(result.get("success")) or "res" in result
+
+
 def cmd_read(args: argparse.Namespace) -> int:
     key = get_api_key()
     datestr = args.date
@@ -195,7 +200,7 @@ def cmd_read(args: argparse.Namespace) -> int:
     }
     result = http_post(READ_ENDPOINT, payload, make_headers(key))
     # 读取接口返回 {"res": {...}}，不一定有 success 字段
-    if result.get("success") or "res" in result:
+    if has_success_result(result):
         cache.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
         update_rate_limit(action, datestr)
         print(json.dumps(result, ensure_ascii=False, indent=2))
@@ -217,8 +222,19 @@ def cmd_upsert(args: argparse.Namespace) -> int:
         print(f"错误：JSON 解析失败 {e}", file=sys.stderr)
         return 1
 
+    include_full_data = bool(args.full)
+    if isinstance(data, dict):
+        include_full_data = include_full_data or bool(data.get("include_full_data"))
+
     # 规范化 payload
-    res = data if isinstance(data, list) else data.get("trains", data)
+    if isinstance(data, list):
+        res = data
+    elif isinstance(data, dict):
+        res = data.get("res", data.get("trains", data))
+        if isinstance(res, dict):
+            res = res.get("trains", res)
+    else:
+        res = data
     if not isinstance(res, list):
         print("错误：res 必须是训练数组或包含 trains 字段的对象。", file=sys.stderr)
         return 1
@@ -250,17 +266,17 @@ def cmd_upsert(args: argparse.Namespace) -> int:
         "schema_version": "train_open_api_v2",
         "client_request_id": str(uuid.uuid4()),
         "dry_run": bool(args.dry_run),
-        "include_full_data": False,
+        "include_full_data": include_full_data,
         "res": res,
     }
     result = http_post(UPSERT_ENDPOINT, payload, make_headers(key))
-    if result.get("success"):
+    if has_success_result(result):
         update_rate_limit("upsert", datestr)
         # 写回成功后覆盖缓存
         if not args.dry_run and datestr != "unknown":
-            cache = cache_file(datestr, False)
-            normalized = result.get("res", res)
-            cache.write_text(json.dumps({"success": True, "res": normalized}, ensure_ascii=False, indent=2), encoding="utf-8")
+            cache = cache_file(datestr, include_full_data)
+            cache_payload = result if "res" in result else {"res": res}
+            cache.write_text(json.dumps(cache_payload, ensure_ascii=False, indent=2), encoding="utf-8")
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
     else:
@@ -298,6 +314,13 @@ def main() -> int:
     upsert_parser = sub.add_parser("upsert", help="写回训练")
     upsert_parser.add_argument("--file", required=True, help="待写回的 JSON 文件路径")
     upsert_parser.add_argument("--dry-run", action="store_true", help="仅 dry-run，不真正写回")
+    upsert_parser.add_argument(
+        "--full",
+        "--include-full-data",
+        action="store_true",
+        dest="full",
+        help="写回请求传 include_full_data=true，用于 RPE、动作完成难度或完整标准化返回",
+    )
 
     movements_parser = sub.add_parser("movements", help="获取标准动作中文名表")
 

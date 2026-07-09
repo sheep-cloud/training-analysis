@@ -18,6 +18,30 @@
       "prompt": "我想把刚才整理好的 2026-04-02 胸部训练写回训记，杠铃卧推 4 组 60kg x 10 次都完成。",
       "expected_output": "先展示变更摘要（包含 datestr、标题、动作、组详情），等待用户确认后再调用写回接口；写回时只使用中文动作名，不传内部 key；成功后更新缓存。",
       "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "读取 2026-04-02 的训记训练心率数据，帮我看整次训练和有氧动作的心率变化。",
+      "expected_output": "使用 include_full_data=true 读取数据；识别 trains[].heartRate、sets[].metrics.avgHeartRate/maxHeartRate/minHeartRate 和 sets[].heartRate；说明 sets[].heartRate.values 是最多 50 个分桶平均 BPM 点，不因缺少 heartRates 原始数组判断失败。",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "把 2026-04-02 杠铃卧推第一组 RPE 改成 8.5，并把这个动作完成难度改为困难。",
+      "expected_output": "先用 include_full_data=true 读取原训练，保留原训练其它动作、组和 note 元数据；写回 movements[].sets[].rpe 使用字符串 \"8.5\"，difficulty 使用英文枚举 hard；写回前展示变更摘要并等待确认。",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "把 2026-04-02 这条训练的历史卡片颜色改成橙色 #FF7A00。",
+      "expected_output": "先读取原训练，只修改 note.trainColor，不写顶层 color；保留 localid、datestr、start、end、title、movements 和 note 中 text、heartRate、customTitle、personalworkout_* 等其它元数据；写回前展示变更摘要并等待确认。",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "训记写回接口返回只有 res 没有 success 字段时，判断这次写回是否成功。",
+      "expected_output": "只要返回包含 res，就按新版接口语义视为成功，不要求 success === true；缓存服务端原始返回或包含 res 的标准化结果，不伪造必须存在的 success: true。",
+      "files": []
     }
   ]
 }
